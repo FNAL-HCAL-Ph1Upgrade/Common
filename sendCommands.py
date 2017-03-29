@@ -67,7 +67,7 @@ def send_commands(cmds=cmds_default, script=False, raw=False, progbar=False, por
 				p.sendline(c)
 				if c != "quit":
 					if progbar:
-						progress(i, len(cmds), cmds[i].split()[1])
+						progress(i, len(cmds), cmds[i] if cmds[i] == "wait" else cmds[i].split()[1])
 					t0 = time()
 					p.expect("{0}\s?#((\s|E)[^\r^\n]*)".format(escape(c)))
 					t1 = time()
@@ -83,7 +83,7 @@ def send_commands(cmds=cmds_default, script=False, raw=False, progbar=False, por
 			for i, c in enumerate(cmds):
 				# Deterimine how long to wait until the first result is expected:
 				if i == 0:
-					timeout = max([30, int(0.0075*len(cmds))])
+					timeout = max([60, int(0.0075*len(cmds))])
 #					print i, c, timeout
 				else:
 					timeout = 30		# pexpect default
@@ -92,7 +92,7 @@ def send_commands(cmds=cmds_default, script=False, raw=False, progbar=False, por
 				
 				# Send commands:
 				if progbar:
-					progress(i, len(cmds), cmds[i].split()[1])
+					progress(i, len(cmds), cmds[i] if cmds[i] == "wait" else cmds[i].split()[1])
 				t0 = time()
 				p.expect("{0}\s?#((\s|E)[^\r^\n]*)".format(escape(c)), timeout=timeout)
 				t1 = time()
@@ -103,6 +103,7 @@ def send_commands(cmds=cmds_default, script=False, raw=False, progbar=False, por
 					"times": [t0, t1],
 				})
 				raw_output += p.before + p.after
+                                p.sendline("wait")
 			p.sendline("quit")
 		if progbar:
 			progress()

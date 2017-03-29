@@ -29,7 +29,7 @@ v = False
 names = []			# List of names ordered as in registers list.
 # fe_crate = 13
 # fe_slot = 2
-n = 5 #at.n
+n = 1#5 #at.n
 errdic = {}
 port = 64000
 host = 'localhost'
@@ -50,17 +50,17 @@ def setQIEDefaults(crate, rm_slot, RBXtype):
              'put {0}{1}-{2}-{3}-B_Bottom_TRST_N 1'.format(RBXtype,crate,rm,slot),
              ]
     if RBXtype == "HE":
-        cmds += ["put HE{0}-{1}-i_AddrToSERDES 0".format(crate,slot),
-                 "put HE{0}-{1}-i_CntrReg_CImode 0".format(crate,slot),
-                 "put HE{0}-{1}-i_CntrReg_WrEn_InputSpy 0".format(crate,slot),
-                 "put HE{0}-{1}-i_CtrlToSERDES_i2c_go 0".format(crate,slot),
-                 "put HE{0}-{1}-i_CtrlToSERDES_i2c_write 0".format(crate,slot),
-                 "put HE{0}-{1}-i_DataToSERDES 0".format(crate,slot),
-                 "put HE{0}-{1}-i_Linktestmode 0".format(crate,slot),
+        cmds += ["put HE{0}-{1}-{2}-i_AddrToSERDES 0".format(crate,rm,slot),
+                 "put HE{0}-{1}-{2}-i_CntrReg_CImode 0".format(crate,rm,slot),
+                 "put HE{0}-{1}-{2}-i_CntrReg_WrEn_InputSpy 0".format(crate,rm,slot),
+                 "put HE{0}-{1}-{2}-i_CtrlToSERDES_i2c_go 0".format(crate,rm,slot),
+                 "put HE{0}-{1}-{2}-i_CtrlToSERDES_i2c_write 0".format(crate,rm,slot),
+                 "put HE{0}-{1}-{2}-i_DataToSERDES 0".format(crate,rm,slot),
+                 "put HE{0}-{1}-{2}-i_LinkTestMode 0".format(crate,rm,slot),
                  ]
     # TODO: add HB igloo (not sure yet what the format is)
 
-    nQIE = 48
+    nQIE = 12 #48
     if RBXtype == "HB":
         nQIE = 64
     cmds += ["put {0}{1}-{2}-QIE[1-{3}]_Lvds {3}*1".format(RBXtype, crate, rm, nQIE),
@@ -77,11 +77,11 @@ def setQIEDefaults(crate, rm_slot, RBXtype):
              "put {0}{1}-{2}-QIE[1-{3}]_FixRange {3}*0".format(RBXtype, crate, rm, nQIE),
              "put {0}{1}-{2}-QIE[1-{3}]_RangeSet {3}*0".format(RBXtype, crate, rm, nQIE),
              "put {0}{1}-{2}-QIE[1-{3}]_ChargeInjectDAC {3}*0".format(RBXtype, crate, rm, nQIE),
-             "put {0}{1}-{2}-QIE[1-{3}]_GSel {3}*7".format(RBXtype, crate, rm, nQIE),
-             "put {0}{1}-{2}-QIE[1-{3}]_HSel {3}*7".format(RBXtype, crate, rm, nQIE),
+             "put {0}{1}-{2}-QIE[1-{3}]_Gsel {3}*7".format(RBXtype, crate, rm, nQIE),
+             "put {0}{1}-{2}-QIE[1-{3}]_Hsel {3}*0".format(RBXtype, crate, rm, nQIE),
              "put {0}{1}-{2}-QIE[1-{3}]_Idcset {3}*0".format(RBXtype, crate, rm, nQIE),
              "put {0}{1}-{2}-QIE[1-{3}]_CkOutEn {3}*1".format(RBXtype, crate, rm, nQIE),
-             "put {0}{1}-{2}-QIE[1-{3}]_TDCMode {3}*0".format(RBXtype, crate, rm, nQIE),
+             "put {0}{1}-{2}-QIE[1-{3}]_TDCmode {3}*0".format(RBXtype, crate, rm, nQIE),
              "put {0}{1}-{2}-QIE[1-{3}]_PhaseDelay {3}*0".format(RBXtype, crate, rm, nQIE),
              "put {0}{1}-{2}-Qie[1-{3}]_ck_ph {3}*0".format(RBXtype, crate, rm, nQIE),
              ]
@@ -106,17 +106,17 @@ def rand(size = 1):
 
 	return output[:-1]
 
-def register(name = None, size = 1, n = 5, multQIEs = False):
+def register(name = None, size = 1, n = 5, multQIEs = False, nQIE=48):
 	cmds = []
 	for i in range(n):
 		r = ''
 		if multQIEs:
-			for i in range(24):
+			for i in range(nQIE):
 				r += '{0} '.format(rand(size))
 		else:
 			r = rand(size)
-		cmds += ['put {0} {1}'.format(name, r),'get {0}'.format(name)]
-		# cmds += ['put {0} {1}'.format(name, r), 'wait','get {0}'.format(name), 'wait']
+		#cmds += ['put {0} {1}'.format(name, r),'get {0}_rr'.format(name)]
+		cmds += ['put {0} {1}'.format(name, r), 'wait','get {0}'.format(name), 'wait']
 	return cmds
 
 def create_plots(info = [-1,-1,'0x00000000 0x00000000'],names = None, dic = None, k = 1):
@@ -246,37 +246,41 @@ def registerTest(fe_crate, rm_slot, RBXtype):
     uID = "%s %s"%(output[0]['result'].split()[1],output[0]['result'].split()[2])
 
 
-    print '{0} {1}, RM {2}, Slot {3}, UniqueId {5}'.format(RBXtype, fe_crate, rm, slot, uID)
+    print '{0} {1}, RM {2}, Slot {3}, UniqueId {4}'.format(RBXtype, fe_crate, rm, slot, uID)
+    
+    if "NACK" in uID:
+        print "Could not communicate with UniqueId, will skip rest of the test"
+        return
 
     names = []
     registers = []			# List of commands to be sent to ngFEC tool
     errdic = {}
 
-    nQIE = 48
+    nQIE = 12 #48
     if RBXtype == "HB":
         nQIE = 64
 
     registers.extend(
-        register("{0}{1}-{2}-QIE[1-{3}]_Lvds".format(RBXtype, fe_crate, rm, nQIE), 1, n, True) +			# 1 bit
-        register("{0}{1}-{2}-QIE[1-{3}]_Trim".format(RBXtype, fe_crate, rm, nQIE), 2, n, True) +			# 2 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_DiscOn".format(RBXtype, fe_crate, rm, nQIE), 1, n, True) +			# 1 bit
-        register("{0}{1}-{2}-QIE[1-{3}]_TGain".format(RBXtype, fe_crate, rm, nQIE), 1, n, True) +			# 1 bit
-        register("{0}{1}-{2}-QIE[1-{3}]_TimingThresholdDAC".format(RBXtype, fe_crate, rm, nQIE), 8, n, True) +	# 8 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_TimingIref".format(RBXtype, fe_crate, rm, nQIE), 3, n, True) +		# 3 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_PedestalDAC".format(RBXtype, fe_crate, rm, nQIE), 6, n, True) +		# 6 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_CapID0pedestal".format(RBXtype, fe_crate, rm, nQIE), 4, n, True) +		# 4 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_CapID1pedestal".format(RBXtype, fe_crate, rm, nQIE), 4, n, True) +		# 4 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_CapID2pedestal".format(RBXtype, fe_crate, rm, nQIE), 4, n, True) +		# 4 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_CapID3pedestal".format(RBXtype, fe_crate, rm, nQIE), 4, n, True) +		# 4 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_FixRange".format(RBXtype, fe_crate, rm, nQIE), 1, n, True) +			# 1 bit
-        register("{0}{1}-{2}-QIE[1-{3}]_RangeSet".format(RBXtype, fe_crate, rm, nQIE), 2, n, True) +			# 2 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_ChargeInjectDAC".format(RBXtype, fe_crate, rm, nQIE), 3, n, True) +		# 3 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_GSel".format(RBXtype, fe_crate, rm, nQIE), 5, n, True) +			# 5 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_HSel".format(RBXtype, fe_crate, rm, nQIE), 1, n, True) +			# 1 bit
-        register("{0}{1}-{2}-QIE[1-{3}]_Idcset".format(RBXtype, fe_crate, rm, nQIE), 5, n, True) +			# 5 bits
-        register("{0}{1}-{2}-QIE[1-{3}]_CkOutEn".format(RBXtype, fe_crate, rm, nQIE), 1, n, True) +			# 1 bit
-        register("{0}{1}-{2}-QIE[1-{3}]_TDCMode".format(RBXtype, fe_crate, rm, nQIE), 1, n, True) +			# 1 bit
-        register("{0}{1}-{2}-Qie[1-{3}]_ck_ph".format(RBXtype, fe_crate, rm, nQIE), 4, n, True)			# 4 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_Lvds".format(RBXtype, fe_crate, rm, nQIE), 1, n, True, nQIE) +			# 1 bit
+        register("{0}{1}-{2}-QIE[1-{3}]_Trim".format(RBXtype, fe_crate, rm, nQIE), 2, n, True, nQIE) +			# 2 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_DiscOn".format(RBXtype, fe_crate, rm, nQIE), 1, n, True, nQIE) +			# 1 bit
+        register("{0}{1}-{2}-QIE[1-{3}]_TGain".format(RBXtype, fe_crate, rm, nQIE), 1, n, True, nQIE) +			# 1 bit
+        register("{0}{1}-{2}-QIE[1-{3}]_TimingThresholdDAC".format(RBXtype, fe_crate, rm, nQIE), 8, n, True, nQIE) +	# 8 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_TimingIref".format(RBXtype, fe_crate, rm, nQIE), 3, n, True, nQIE) +		# 3 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_PedestalDAC".format(RBXtype, fe_crate, rm, nQIE), 6, n, True, nQIE) +		# 6 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_CapID0pedestal".format(RBXtype, fe_crate, rm, nQIE), 4, n, True, nQIE) +		# 4 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_CapID1pedestal".format(RBXtype, fe_crate, rm, nQIE), 4, n, True, nQIE) +		# 4 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_CapID2pedestal".format(RBXtype, fe_crate, rm, nQIE), 4, n, True, nQIE) +		# 4 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_CapID3pedestal".format(RBXtype, fe_crate, rm, nQIE), 4, n, True, nQIE) +		# 4 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_FixRange".format(RBXtype, fe_crate, rm, nQIE), 1, n, True, nQIE) +			# 1 bit
+        register("{0}{1}-{2}-QIE[1-{3}]_RangeSet".format(RBXtype, fe_crate, rm, nQIE), 2, n, True, nQIE) +			# 2 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_ChargeInjectDAC".format(RBXtype, fe_crate, rm, nQIE), 3, n, True, nQIE) +		# 3 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_Gsel".format(RBXtype, fe_crate, rm, nQIE), 5, n, True, nQIE) +			# 5 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_Hsel".format(RBXtype, fe_crate, rm, nQIE), 1, n, True, nQIE) +			# 1 bit
+        register("{0}{1}-{2}-QIE[1-{3}]_Idcset".format(RBXtype, fe_crate, rm, nQIE), 5, n, True, nQIE) +			# 5 bits
+        register("{0}{1}-{2}-QIE[1-{3}]_CkOutEn".format(RBXtype, fe_crate, rm, nQIE), 1, n, True, nQIE) +			# 1 bit
+        register("{0}{1}-{2}-QIE[1-{3}]_TDCmode".format(RBXtype, fe_crate, rm, nQIE), 1, n, True, nQIE) +			# 1 bit
+        register("{0}{1}-{2}-Qie[1-{3}]_ck_ph".format(RBXtype, fe_crate, rm, nQIE), 4, n, True, nQIE)			# 4 bits
         )
     
     if RBXtype == "HE":
@@ -287,21 +291,24 @@ def registerTest(fe_crate, rm_slot, RBXtype):
         register("HE{0}-{1}-{2}-i_CtrlToSERDES_i2c_go".format(fe_crate, rm, slot), 1, n) +		# 1 bit
         register("HE{0}-{1}-{2}-i_CtrlToSERDES_i2c_write".format(fe_crate, rm, slot), 1, n) +		# 1 bit
         register("HE{0}-{1}-{2}-i_DataToSERDES".format(fe_crate, rm, slot), 32, n) +			# 32 bits
-        register("HE{0}-{1}-{2}-i_LinkTestMode".format(fe_crate, rm, slot), 8, n) +			# 8 bits
+        register("HE{0}-{1}-{2}-i_LinkTestMode".format(fe_crate, rm, slot), 8, n) 			# 8 bits
         )
     
-    for reg in registers[1::2*n]:
+    for reg in registers[2::4*n]:
         names.extend([reg[4:]])
 
-    output = sendCommands.send_commands(cmds = registers, script = False, progbar = True,control_hub=host,port=port)
+    #print registers
+
+    output = sendCommands.send_commands(cmds = registers, script = True, progbar = True,control_hub=host,port=port)
 
     errlist = []
     totaltests = 0
     rwerr = 0
     xerr = 0
-#        print output
+    #print output
     lastCmd = ''
-    for i, (put, get) in enumerate(zip(output[::2], output[1::2])):
+    for i, (put, get) in enumerate(zip(output[::4], output[2::4])):
+        #print i, put, get
         if not get['cmd'][4:]== lastCmd:
             badChannels = nQIE*[0]
         lastCmd = get['cmd'][4:]
@@ -402,23 +409,23 @@ if __name__ == "__main__":
 
         if fe_slot == -1:
             # We'll check whether we can find the filled slots ourselves
-            cmd = ['get {0}{1}-1-[1,2,3,4]-B_SHT_temp_f'.format(options.type, fe_crate)]
-            for rm in [2,3,4]:
-                cmd.append('get {0}{1}-{2}-[1,2,3,4]-B_SHT_temp_f'.format(options.type, fe_crate, rm))
-            output = sendCommands.send_commands(cmds = cmd,port=port,control_hub=host)
             slotList = ["1-1","1-2","1-3","1-4","2-1","2-2","2-3","2-4","3-1","3-2","3-3","3-4","4-1","4-2","4-3","4-4"]
+            cmd = []
+            for slot in slotList:
+                cmd.append('get {0}{1}-{2}-B_SHT_temp_f'.format(options.type, fe_crate, slot))
+            output = sendCommands.send_commands(cmds = cmd,script=True,port=port,control_hub=host)
             filledSlots = []
-            for rm in range(4):
-                temps = output['result'][rm].split()
-                for i in range(len(temps)):
-                    try:
-                        if float(temps[i])>0:
-                            filledSlots.append(slotList[rm*4+i])
-                        elif float(temps[i])>-270:
-                            print 'Problem with card in rm %i', (rm+1), ', slot %i',i+1
-                    except ValueError as err:
-                        print 'Problem with card in rm %i', (rm+1), ', slot %i',i+1
-                        print "Error was: ", err
+            for islot, slot in enumerate(slotList):
+                temps = output[islot]['result'].split()
+                try:
+                    if float(temps[0])>0:
+                        filledSlots.append(slot)
+                    elif float(temps[0])>-270:
+                        print 'Problem with card in slot %s', slot
+                except ValueError as err:
+                    #print 'Problem with card in slot', slot
+                    #print "Error was: ", err
+                    print "No card detected in slot", slot
         else:
             if type(qie_cards) == type(int()):
                 qie_cards = [qie_cards]
@@ -436,7 +443,7 @@ if __name__ == "__main__":
 
         print 'Running over slots', filledSlots
         for i_slot in filledSlots:
-            print 'Slot %i'%i_slot
+            print 'Slot %s'%i_slot
             registerTest(fe_crate, i_slot, options.type)
             setQIEDefaults(fe_crate, i_slot, options.type)
 
