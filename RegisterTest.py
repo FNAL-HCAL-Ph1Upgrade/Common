@@ -28,8 +28,8 @@ names = []			# List of names ordered as in registers list.
 n = 5 #at.n
 errdic = {}
 port = 64000
-#host = 'localhost'
-host = 'cmshcal4'
+host = 'localhost'
+#host = 'cmshcal4'
 
 def setQIEDefaults(crate, rm_slot, RBXtype):
 
