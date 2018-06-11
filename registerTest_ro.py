@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 import ngFECSendCommand as sendCommands
 
-port = 64000
+port = 64100
 host = 'localhost'
 n = 5
 
@@ -113,7 +113,7 @@ def registerTest_ro_igloo(crate, rm, slot):
       ["Clk_count", 0, (2**16)-1, True],
       #["DataFromSERDES", 0, -1, False],
       ["FPGA_MAJOR_VERSION", 1, 1, False],
-      ["FPGA_MINOR_VERSION", 1, 1, False],
+      ["FPGA_MINOR_VERSION", 3, 3, False],
       ["FPGA_TopOrBottom", 0, 1, False],
       ["OnesRegister", 0xffffffff, 0xffffffff, False],
       ["Spy32bits", 0, (2**32)-1, True],

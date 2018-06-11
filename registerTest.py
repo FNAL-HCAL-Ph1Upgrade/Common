@@ -7,7 +7,7 @@ import uuid
 import ngFECSendCommand as sendCommands
 import logging
 
-port = 64000
+port = 64100
 host = 'localhost'
 
 from registerTest_setDefaults import registerTest_setDefaults_bridge
@@ -20,20 +20,19 @@ from registerTest_rw import registerTest_rw_bridge
 from registerTest_rw import registerTest_rw_igloo
 from registerTest_rw import registerTest_rw_qie
 
-def backplanereset(crate):
+def backplanereset(crate, half):
    logger = logging.getLogger(__name__)
-   logger.info('resetting the backplane')
-   
+   logger.info('resetting backplane {0}'.format(half))   
+  
    cmds = [
-      'put HB{0}-bkp_pwr_enable 1'.format(crate),
-      'put HB{0}-bkp_reset 1'.format(crate),
-      'put HB{0}-bkp_reset 0'.format(crate)
+      'put HB{0}{1}-bkp_pwr_enable 1'.format(crate, half),
+      'put HB{0}{1}-bkp_reset 1'.format(crate, half),
+      'put HB{0}{1}-bkp_reset 0'.format(crate, half)
    ]
-
+   
    output = []
    for cmd in cmds:
       output += sendCommands.send_commands(cmds=cmd, script=True, port=port, control_hub=host)
-
    for entry in output:
       result = entry['result']
       if not 'OK' in result:
@@ -100,18 +99,18 @@ if __name__ == "__main__":
    parser = OptionParser()
    parser.add_option("-c", "--crate", dest="c",
       default=-1,
+      type = "int",
       help="crate number",
-      metavar="nr"
    )
    parser.add_option("-r", "--readoutmodule", dest="r",
       default=-1,
+      type = "int",
       help="readout module number",
-      metavar="nr"
    )
    parser.add_option("-s", "--slot", dest="s",
       default=-1,
+      type = "int",
       help="slot number within the readout module",
-      metavar="nr"
    )
    (options, args) = parser.parse_args()
 
@@ -122,14 +121,14 @@ if __name__ == "__main__":
       sys.exit()
    
    rm = options.r
-   if rm == -1:
-      logger.critical('specify a readout module number!')
+   if not (rm==1 or rm==2 or rm==3 or rm==4):
+      logger.critical('specify a proper readout module number!')
       logger.critical('required registerTest options: python registerTest.py --crate X --readoutmodule Y --slot Z')
       sys.exit()
    
    slot = options.s
-   if slot == -1:
-      logger.critical('specify a slot number!')
+   if not (slot==1 or slot==2 or slot==3 or slot==4):
+      logger.critical('specify a proper slot number!')
       logger.critical('required registerTest options: python registerTest.py --crate X --readoutmodule Y --slot Z')
       sys.exit()
 
@@ -138,7 +137,10 @@ if __name__ == "__main__":
    outlog = []
 
    # reset the backplane
-   outlog += backplanereset(crate)
+   if rm==1 or rm==2:
+      outlog += backplanereset(crate, "a")
+   elif rm==3 or rm==4: 
+      outlog += backplanereset(crate, "b")
 
    # check the temperature sensor
    outlog += checktemp(crate, rm, slot)
