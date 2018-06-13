@@ -150,9 +150,12 @@ if __name__ == "__main__":
    # check for the unique id
    out, uID = checkid(crate, rm, slot)
    outlog += out
+   outputPath = "./registerTestResults/{0}/".format(uID)
+   if not os.path.exists(outputPath):
+      os.makedirs(outputPath)
 
    # rename log file to have uID in name
-   runlog_fname = "./testresults.{0}.log".format(uID)
+   runlog_fname = outputPath+"testresults.log"
    os.rename(tf, runlog_fname)
    logger.info('the temporary log file has been renamed: {0}'.format(runlog_fname))
 
@@ -177,7 +180,7 @@ if __name__ == "__main__":
    outlog += registerTest_setDefaults_qie(crate, rm, slot)
 
    # dump all communication
-   outlog_fname = "./commands.{0}.json".format(uID)
+   outlog_fname = outputPath+"commands.json".format(uID)
    with open(outlog_fname, "w") as file:
       file.write(json.dumps(outlog))
  
