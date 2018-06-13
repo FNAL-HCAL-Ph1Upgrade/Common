@@ -7,7 +7,7 @@ import uuid
 import ngFECSendCommand as sendCommands
 import logging
 
-port = 64100
+port = 64000
 host = 'localhost'
 
 from registerTest_setDefaults import registerTest_setDefaults_bridge
@@ -59,7 +59,7 @@ def checkid(crate, rm, slot):
    uID = output[0]['result']
    logger.info('UniqueID is: {0}'.format(uID))
    uID = uID.split(" ")
-   uID = uID[2]
+   uID = uID[1]+"_"+uID[2]
    return output, uID
 
 
@@ -88,10 +88,12 @@ if __name__ == "__main__":
 
    tf = "{0}.tmp".format(str(uuid.uuid4()))
    logging.basicConfig(filename=tf, level=logging.DEBUG)
+   
    console = logging.StreamHandler()
    console.setLevel(logging.INFO)
    logging.getLogger('').addHandler(console)
    logger = logging.getLogger(__name__)
+   
    logger.info("##########")
    logger.info('your temporary logfile: ./{0}'.format(tf))
    logger.info(time.ctime(time.time()))
@@ -115,8 +117,8 @@ if __name__ == "__main__":
    (options, args) = parser.parse_args()
 
    crate = options.c
-   if crate == -1:
-      logger.critical('specify a crate number!')
+   if not (crate==0 or crate==1):
+      logger.critical('specify a proper crate number!')
       logger.critical('required registerTest options: python registerTest.py --crate X --readoutmodule Y --slot Z')
       sys.exit()
    
@@ -137,10 +139,10 @@ if __name__ == "__main__":
    outlog = []
 
    # reset the backplane
-   if rm==1 or rm==2:
-      outlog += backplanereset(crate, "a")
-   elif rm==3 or rm==4: 
-      outlog += backplanereset(crate, "b")
+   if (rm==1 or rm==2):
+      outlog += backplanereset(crate, "")
+   elif (rm==3 or rm==4): 
+      outlog += backplanereset(crate, "")
 
    # check the temperature sensor
    outlog += checktemp(crate, rm, slot)

@@ -19,7 +19,8 @@ class DelayedKeyboardInterrupt(object):
             self.old_handler(*self.signal_received)
 
 def send_commands(port, control_hub, cmds, script=False, raw=False, time_out=30):
-    # Arguments and variables
+    #print cmds
+   # Arguments and variables
     output = []
     raw_output = ""
     if control_hub != None and port:               # Potential bug if "port=0" ... (Control_hub should be allowed to be None.)
@@ -30,6 +31,7 @@ def send_commands(port, control_hub, cmds, script=False, raw=False, time_out=30)
             pass
         else:
             cmds = [c for c in cmds if c != "quit"]         # "quit" can't be in a ngFEC script.
+            #print cmds
             cmds_str = ""
             for c in cmds:
                 cmds_str += "{0}\n".format(c)

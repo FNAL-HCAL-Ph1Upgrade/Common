@@ -33,6 +33,8 @@ def progress(i = 0, n = 0, name = None, k = 50): # i: iterator, k: total length 
 cmds_default = ["quit"]
 
 def send_commands(cmds=cmds_default, script=False, raw=False, progbar=False, port = 4342, control_hub = "hcal904daq02"):
+	print(*cmds)
+	print("frank")
 	# Arguments and variables
 	output = []
 	raw_output = ""
