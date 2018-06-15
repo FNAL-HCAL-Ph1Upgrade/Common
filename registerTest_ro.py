@@ -32,28 +32,33 @@ def getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False):
 
 def checkOutput_ro(output, regs):
 
-   #vals = []
-   #for entry in output:
-   #   result = entry['result']
+   # load up the numbers into an array
+   vals = []
+   for entry in output:
+      result = entry['result']
    #   if "ERROR" in result:
    #      logger.error('trouble with get command: {0}'.format(entry))
-   #      vals += [result]
    #   else :
-   #      result = entry['result'].replace('0x', '') 
+   #      #result = entry['result'].replace('0x', '') 
    #      result = int(result, 16)
-   #      vals += [result]
-   #      if (result < min or result > max):
-   #         logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(entry, min, max))
+      vals.append(result)
+   print vals
 
-   #if checkStuck:
-   #   isdup = False
-   #   unique = vals
-   #   for entry in vals:
-   #      count = unique.count(entry)
-   #      if count > 1:
-   #         isdup = True         
-   #   if isdup:
-   #      logger.error("counter may be stuck: {0}".format(output))
+   # now loop through registers
+ #  for i, reg in regs:      
+ #     nums = vals[5*i:5*i+4]
+ #     for num in nums:
+ #        if (num<reg[1]) or (num>reg[2]):
+ #           logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(output[i], reg[1], reg[2]))
+ #        if reg[3]:
+ #           isdup = False
+ #           unique = nums
+ #           for entry in nums:
+ #              count = unique.count(entry)
+ #              if count > 1:
+ #                 isdup = True
+ #           if isdup:
+ #              logger.error("counter may be stuck: {0}".format(output))
 
 
 def registerTest_ro_bridge(crate, rm, slot):
@@ -64,35 +69,35 @@ def registerTest_ro_bridge(crate, rm, slot):
       ["B_AddrMatchCnt1", 0xadd0, 0xadd0, False],
       ["B_AddrMatchCnt2", 0xbad, 0xbad, False],      
       ["B_BkPln_GEO", int(slot), int(slot), False],
-      ["B_BkPln_RES_QIE", 0, 0, False],  
-      ["B_BkPln_Spare_1_Counter", 0xbadadd0, 0xbadadd0, False],
-      ["B_BkPln_Spare_2_Counter", 0xbadadd0, 0xbadadd0, False],
-      ["B_BkPln_Spare_3_Counter", 0xbadadd0, 0xbadadd0, False],
-      ["B_BkPln_WTE", 0, 0, False],
-      ["B_CLOCKCOUNTER", 0, (2**12)-1, True],
-      ["B_FIRMVERSION_MAJOR", 4, 4, False],
-      ["B_FIRMVERSION_MINOR", 2, 2, False],
-      ["B_ID1", 0x4842524d, 0x4842524d, False],
-      ["B_ID2", 0x42726467, 0x42726467, False],
-      ["B_ONES", 0xffffffff, 0xffffffff, False],
-      ["B_ONESZEROES", 0xaaaaaaaa, 0xaaaaaaaa, False],
-      ["B_RESQIECOUNTER", 0, (2**21)-1, True],
-      #["B_SHT_ident", 0, -1], # returns two words
-      #["B_SHT_rh_f", 0, -1], # returns decimal
-      #["B_SHT_temp_f", 0. -1], # returns decimal
-      ["B_WTECOUNTER", 0, (2**21)-1, True],
-      ["B_ZEROES", 0, 0, False],
+      #["B_BkPln_RES_QIE", 0, 0, False],  
+      #["B_BkPln_Spare_1_Counter", 0xbadadd0, 0xbadadd0, False],
+      #["B_BkPln_Spare_2_Counter", 0xbadadd0, 0xbadadd0, False],
+      #["B_BkPln_Spare_3_Counter", 0xbadadd0, 0xbadadd0, False],
+      #["B_BkPln_WTE", 0, 0, False],
+      #["B_CLOCKCOUNTER", 0, (2**12)-1, True],
+      #["B_FIRMVERSION_MAJOR", 4, 4, False],
+      #["B_FIRMVERSION_MINOR", 2, 2, False],
+      #["B_ID1", 0x4842524d, 0x4842524d, False],
+      #["B_ID2", 0x42726467, 0x42726467, False],
+      #["B_ONES", 0xffffffff, 0xffffffff, False],
+      #["B_ONESZEROES", 0xaaaaaaaa, 0xaaaaaaaa, False],
+      #["B_RESQIECOUNTER", 0, (2**21)-1, True],
+      ##["B_SHT_ident", 0, -1], # returns two words
+      ##["B_SHT_rh_f", 0, -1], # returns decimal
+      ##["B_SHT_temp_f", 0. -1], # returns decimal
+      #["B_WTECOUNTER", 0, (2**21)-1, True],
+      #["B_ZEROES", 0, 0, False],
       ["B_bc0_status_count", 0, (2**21)-1, True],
-      ["B_bc0_status_max", 0xdec, 0xdec, False],
-      ["B_bc0_status_min", 0xdec, 0xdec, False],
-      ["B_bc0_status_missing", 0, 0, False],
-      ["B_bc0_status_shift", 0, 0, False]
+      #["B_bc0_status_max", 0xdec, 0xdec, False],
+      #["B_bc0_status_min", 0xdec, 0xdec, False],
+      #["B_bc0_status_missing", 0, 0, False],
+      #["B_bc0_status_shift", 0, 0, False]
    ]
    #getCounterSize(regs, crate, rm, slot, isBridge=True, isIgloo=False)
    
    cmds = []
-   for reg in regs:
-      for i in range(0, n):
+   for i in range(0, n):
+      for reg in regs:
          cmds.append("get HB{0}-{1}-{2}-{3}".format(crate, rm, slot, reg[0])) 
 
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
@@ -143,10 +148,10 @@ def registerTest_ro_igloo(crate, rm, slot):
    #getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=True)
    
    cmds = []
-   for reg in regs:
-      for igloo in ["iTop", "iBot"]:
-         for i in range(0, n):
-            cmds.append("get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, igloo, reg[0]))            
+   for i in range(0, n):
+      for reg in regs:
+         for igloo in ["iTop", "iBot"]:
+            cmds.append("get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, igloo, reg[0]))
 
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
    checkOutput_ro(output, regs)

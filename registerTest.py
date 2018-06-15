@@ -27,15 +27,16 @@ def writeToCmdLog(output, cmdlogfile):
 #def backplanereset(crate, half):
 def backplanereset(crate):
    logger = logging.getLogger(__name__)
-   logger.info('resetting backplane {0}'.format(half))   
-  
+   #logger.info('resetting backplane {0}'.format(half))   
+   logger.info('resetting backplane {0}'.format(crate))   
+
    cmds = []
    #cmds.append('put HB{0}{1}-bkp_pwr_enable 1'.format(crate, half))
    #cmds.append('put HB{0}{1}-bkp_reset 1'.format(crate, half))
    #cmds.append('put HB{0}{1}-bkp_reset 0'.format(crate, half)) 
-   cmds.append('put HB{0}-bkp_pwr_enable 1'.format(crate, half))
-   cmds.append('put HB{0}-bkp_reset 1'.format(crate, half))
-   cmds.append('put HB{0}-bkp_reset 0'.format(crate, half))
+   cmds.append('put HB{0}-bkp_pwr_enable 1'.format(crate))
+   cmds.append('put HB{0}-bkp_reset 1'.format(crate))
+   cmds.append('put HB{0}-bkp_reset 0'.format(crate))
 
    output = sendCommands.send_commands(cmds=cmds, script=False, port=port, control_hub=host)   
    
