@@ -60,7 +60,7 @@ def send_commands(port, control_hub, cmds, script=False, raw=False, time_out=30)
                             t1 = time.time()
                             output.append({
                                     "cmd": c,
-                                    "result": p.match.group(1).strip().replace("'", ""),
+                                    "result": p.match.group(1).replace('# _','').strip().replace("'", ""),
                                     "times": [t0, t1],
                             })
                             raw_output += p.before + p.after

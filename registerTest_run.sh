@@ -21,4 +21,4 @@ python registerTest.py -c 1 -r 4 -s 2
 python registerTest.py -c 1 -r 4 -s 3
 python registerTest.py -c 1 -r 4 -s 4
 
-rm *.tmp
+#rm *.tmp

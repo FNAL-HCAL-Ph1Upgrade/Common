@@ -74,6 +74,7 @@ def send_commands(cmds=cmds_default, script=False, raw=False, progbar=False, por
 					p.expect("{0}\s?#((\s|E)[^\r^\n]*)".format(escape(c)))
 					t1 = time()
 #					print [p.match.group(0)]
+
 					output.append({
 						"cmd": c,
 						"result": p.match.group(1).strip().replace("'", ""),
