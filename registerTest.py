@@ -24,14 +24,18 @@ def writeToCmdLog(output, cmdlogfile):
    for item in output:
       cmdlogfile.write("%s\n" % item)
 
-def backplanereset(crate, half):
+#def backplanereset(crate, half):
+def backplanereset(crate):
    logger = logging.getLogger(__name__)
    logger.info('resetting backplane {0}'.format(half))   
   
    cmds = []
-   cmds.append('put HB{0}{1}-bkp_pwr_enable 1'.format(crate, half))
-   cmds.append('put HB{0}{1}-bkp_reset 1'.format(crate, half))
-   cmds.append('put HB{0}{1}-bkp_reset 0'.format(crate, half)) 
+   #cmds.append('put HB{0}{1}-bkp_pwr_enable 1'.format(crate, half))
+   #cmds.append('put HB{0}{1}-bkp_reset 1'.format(crate, half))
+   #cmds.append('put HB{0}{1}-bkp_reset 0'.format(crate, half)) 
+   cmds.append('put HB{0}-bkp_pwr_enable 1'.format(crate, half))
+   cmds.append('put HB{0}-bkp_reset 1'.format(crate, half))
+   cmds.append('put HB{0}-bkp_reset 0'.format(crate, half))
 
    output = sendCommands.send_commands(cmds=cmds, script=False, port=port, control_hub=host)   
    
@@ -148,11 +152,12 @@ if __name__ == "__main__":
    logger.info('your temporary command logfile: ./{0}'.format(tempcmdlogname))
 
    # reset the backplane
-   output = []
-   if (rm==1 or rm==2):
-      output = backplanereset(crate, "")
-   elif (rm==3 or rm==4): 
-      output = backplanereset(crate, "")
+   #output = []
+   #if (rm==1 or rm==2):
+   #   output = backplanereset(crate, "")
+   #elif (rm==3 or rm==4): 
+   #   output = backplanereset(crate, "")
+   output = backplanereset(crate)
    writeToCmdLog(output, cmdlogfile)
 
    # check the temperature sensor
