@@ -20,63 +20,46 @@ from registerTest_rw import registerTest_rw_bridge
 from registerTest_rw import registerTest_rw_igloo
 from registerTest_rw import registerTest_rw_qie
 
+def writeToCmdLog(output, cmdlogfile):
+   for item in output:
+      cmdlogfile.write("%s\n" % item)
+
 def backplanereset(crate, half):
    logger = logging.getLogger(__name__)
    logger.info('resetting backplane {0}'.format(half))   
   
-   cmds = [
-      'put HB{0}{1}-bkp_pwr_enable 1'.format(crate, half),
-      'put HB{0}{1}-bkp_reset 1'.format(crate, half),
-      'put HB{0}{1}-bkp_reset 0'.format(crate, half)
-   ]
+   cmds = []
+   cmds.append('put HB{0}{1}-bkp_pwr_enable 1'.format(crate, half))
+   cmds.append('put HB{0}{1}-bkp_reset 1'.format(crate, half))
+   cmds.append('put HB{0}{1}-bkp_reset 0'.format(crate, half)) 
+
+   output = sendCommands.send_commands(cmds=cmds, script=False, port=port, control_hub=host)   
    
-   output = []
-   for cmd in cmds:
-      output += sendCommands.send_commands(cmds=cmd, script=True, port=port, control_hub=host)
    for entry in output:
       result = entry['result']
       if not 'OK' in result:
          logger.critical('trouble with put command: {0}'.format(entry))
+         writeToCmdLog(output, cmdlogfile)
          sys.exit()
 
    return output
-
-
-def checkid(crate, rm, slot):
-   logger = logging.getLogger(__name__)
-   logger.info('checking UniqueID')
-
-   cmd = [
-      'get HB{0}-{1}-{2}-UniqueID'.format(crate, rm, slot)
-   ]
-   output = sendCommands.send_commands(cmds=cmd, script=True, port=port, control_hub=host)
-
-   result = output[0]['result']
-   if "ERROR" in result:
-      logger.critical('trouble with get command: {0}'.format(output[0]))
-      sys.exit()
-   
-   uID = output[0]['result']
-   logger.info('UniqueID is: {0}'.format(uID))
-   uID = uID.split(" ")
-   uID = uID[1]+"_"+uID[2]
-   return output, uID
 
 
 def checktemp(crate, rm, slot):
    logger = logging.getLogger(__name__)
    logger.info('checking the bridge temperature')
    
-   cmd = [
-      'get HB{0}-{1}-{2}-B_SHT_temp_f'.format(crate, rm, slot)
-   ]
+   cmds = []
+   cmds.append('get HB{0}-{1}-{2}-B_SHT_temp_f'.format(crate, rm, slot))
 
-   output = sendCommands.send_commands(cmds=cmd, script=True, port=port, control_hub=host)
+   output = sendCommands.send_commands(cmds=cmds, script=True, port=port, control_hub=host)
 
-   result = output[0]['result']
-   if "ERROR" in result:
-      logger.critical('trouble with get command: {0}'.format(output[0]))
-      sys.exit()
+   for entry in output:
+      result = entry['result']
+      if "ERROR" in result:
+         logger.critical('trouble with get command: {0}'.format(output[0]))
+         writeToCmdLog(output, cmdlogfile)
+         sys.exit()
 
    temp = result.split()
    logger.info('bridge has temperature: {0}'.format(temp[0]))
@@ -84,41 +67,52 @@ def checktemp(crate, rm, slot):
    return output
 
 
-if __name__ == "__main__":
-
-   tf = "{0}.tmp".format(str(uuid.uuid4()))
-   logging.basicConfig(filename=tf, level=logging.DEBUG)
-   
-   console = logging.StreamHandler()
-   console.setLevel(logging.INFO)
-   logging.getLogger('').addHandler(console)
+def checkid(crate, rm, slot):
    logger = logging.getLogger(__name__)
-   
-   logger.info("##########")
-   logger.info('your temporary logfile: ./{0}'.format(tf))
-   logger.info(time.ctime(time.time()))
+   logger.info('checking UniqueID')
+
+   cmds = []
+   cmds.append('get HB{0}-{1}-{2}-UniqueID'.format(crate, rm, slot))
+   output = sendCommands.send_commands(cmds=cmds, script=True, port=port, control_hub=host)
+
+   for entry in output:
+      result = entry['result']
+      if "ERROR" in result:
+         logger.critical('trouble with get command: {0}'.format(output[0]))
+         writeToCmdLog(output, cmdlogfile)
+         sys.exit()
+
+   uID = output[0]['result']
+   uID = uID.split(" ")
+   uID = uID[1]+"_"+uID[2]
+   logger.info('UniqueID is: {0}'.format(uID))
+
+   return output, uID
+
+
+if __name__ == "__main__":
 
    parser = OptionParser()
    parser.add_option("-c", "--crate", dest="c",
-      default=-1,
+      default = -1,
       type = "int",
-      help="crate number",
+      help = "crate number",
    )
    parser.add_option("-r", "--readoutmodule", dest="r",
-      default=-1,
+      default = -1,
       type = "int",
-      help="readout module number",
+      help = "readout module number",
    )
    parser.add_option("-s", "--slot", dest="s",
-      default=-1,
+      default = -1,
       type = "int",
-      help="slot number within the readout module",
+      help = "slot number within the readout module",
    )
    (options, args) = parser.parse_args()
 
    crate = options.c
-   if not (crate==0 or crate==1):
-      logger.critical('specify a proper crate number!')
+   if not (crate>-1):
+      logger.critical('specify a crate number!')
       logger.critical('required registerTest options: python registerTest.py --crate X --readoutmodule Y --slot Z')
       sys.exit()
    
@@ -134,56 +128,86 @@ if __name__ == "__main__":
       logger.critical('required registerTest options: python registerTest.py --crate X --readoutmodule Y --slot Z')
       sys.exit()
 
+   tempname = str(uuid.uuid4())
+   templogname = "{0}.log.tmp".format(tempname)
+   logging.basicConfig(filename=templogname, level=logging.DEBUG)
+   console = logging.StreamHandler()
+   console.setLevel(logging.INFO)
+   logging.getLogger('').addHandler(console)
+   logger = logging.getLogger(__name__)
+
+   logger.info("##########")
+   logger.info('your temporary test logfile: ./{0}'.format(templogname))
+   logger.info(time.ctime(time.time()))
+
    logger.info('begin crate {0}, rm {1}, slot {2}'.format(crate, rm, slot))
 
-   outlog = []
+   # log all commands
+   tempcmdlogname = "{0}.cmdlog.tmp".format(tempname)
+   cmdlogfile = open(tempcmdlogname, 'w+') 
+   logger.info('your temporary command logfile: ./{0}'.format(tempcmdlogname))
 
    # reset the backplane
+   output = []
    if (rm==1 or rm==2):
-      outlog += backplanereset(crate, "")
+      output = backplanereset(crate, "")
    elif (rm==3 or rm==4): 
-      outlog += backplanereset(crate, "")
+      output = backplanereset(crate, "")
+   writeToCmdLog(output, cmdlogfile)
 
    # check the temperature sensor
-   outlog += checktemp(crate, rm, slot)
+   output = checktemp(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
 
    # check for the unique id
-   out, uID = checkid(crate, rm, slot)
-   outlog += out
+   output, uID = checkid(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+ 
    outputPath = "./registerTestResults/{0}/".format(uID)
    if not os.path.exists(outputPath):
       os.makedirs(outputPath)
 
-   # rename log file to have uID in name
-   runlog_fname = outputPath+"testresults.log"
-   os.rename(tf, runlog_fname)
+   # rename test log file to have uID in name
+   runlog_fname = outputPath+"run.log"
+   os.rename(templogname, runlog_fname)
    logger.info('the temporary log file has been renamed: {0}'.format(runlog_fname))
+   # rename command log file to have uID in name
+   runcmdlog_fname = outputPath+"cmds.log"
+   os.rename(tempcmdlogname, runcmdlog_fname)
+   logger.info('the temporary command log file has been renamed: {0}'.format(runcmdlog_fname))
 
    # set defaults
-   outlog += registerTest_setDefaults_bridge(crate, rm, slot)
-   outlog += registerTest_setDefaults_igloo(crate, rm, slot)
-   outlog += registerTest_setDefaults_qie(crate, rm, slot)
+   output = registerTest_setDefaults_bridge(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+   output = registerTest_setDefaults_igloo(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+   output = registerTest_setDefaults_qie(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
    
    # run bridge tests
-   outlog += registerTest_ro_bridge(crate, rm, slot)
-   outlog += registerTest_rw_bridge(crate, rm, slot)
-   outlog += registerTest_setDefaults_bridge(crate, rm, slot)
+   output = registerTest_ro_bridge(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+   output = registerTest_rw_bridge(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+   output = registerTest_setDefaults_bridge(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
    
    # run igloo tests
-   outlog += registerTest_ro_igloo(crate, rm, slot)
-   outlog += registerTest_rw_igloo(crate, rm, slot)
-   outlog += registerTest_setDefaults_igloo(crate, rm, slot)
+   outlog = registerTest_ro_igloo(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+   output = registerTest_rw_igloo(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+   output = registerTest_setDefaults_igloo(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
 
    # run qie tests
-   outlog += registerTest_ro_qie(crate, rm, slot)
-   outlog += registerTest_rw_qie(crate, rm, slot)
-   outlog += registerTest_setDefaults_qie(crate, rm, slot)
+   output = registerTest_ro_qie(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+   output = registerTest_rw_qie(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
+   output = registerTest_setDefaults_qie(crate, rm, slot)
+   writeToCmdLog(output, cmdlogfile)
 
-   # dump all communication
-   outlog_fname = outputPath+"commands.json".format(uID)
-   with open(outlog_fname, "w") as file:
-      file.write(json.dumps(outlog))
- 
    logger.info('finished crate {0}, rm {1}, slot {2}'.format(crate, rm, slot))
    logger.info(time.ctime(time.time()))
    logger.info("##########")

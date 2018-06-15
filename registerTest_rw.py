@@ -28,8 +28,8 @@ def getRegisterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False, isQIE=
             cmdput = "put HB{0}-{1}-QIE{2}_{3} {4}".format(crate, rm, QIE, reg[0], tempint)
             cmdget = "get HB{0}-{1}-QIE{2}_{3}".format(crate, rm, QIE, reg[0])
          output = []
-         output += sendCommands.send_commands(cmds=cmdput, script=True, control_hub=host, port=port)
-         output += sendCommands.send_commands(cmds=cmdget, script=True, control_hub=host, port=port)         
+         output += sendCommands.send_commands(cmds=cmdput, script=False, control_hub=host, port=port)
+         output += sendCommands.send_commands(cmds=cmdget, script=False, control_hub=host, port=port)         
          for (put, get) in zip(output[::2], output[1::2]):
             getvar = int(get['result'], 16)
             if not getvar == tempint:
@@ -42,7 +42,7 @@ def getRegisterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False, isQIE=
 def checkOutput_rw(output):
 
    for i, (put, get) in enumerate(zip(output[::2], output[1::2])):
-      if not put['result']=='OK':
+      if not 'OK' in put['result']:
          logger.error('trouble with put command: {0}'.format(put))
          continue
       if "ERROR" in get['result']:
@@ -75,17 +75,17 @@ def registerTest_rw_bridge(crate, rm, slot):
    ] 
    #getRegisterSize(regs, crate, rm, slot, isBridge=True, isIgloo=False, isQIE=False)
 
-   output = []
+   cmds = []
    for reg in regs:
       getcmd = "get HB{0}-{1}-{2}-{3}".format(crate, rm, slot, reg[0])
-      output_ = []
       for i in range(n):
          tempint = hex(randint(0, (2**reg[1])-1))
          putcmd = "put HB{0}-{1}-{2}-{3} {4}".format(crate, rm, slot, reg[0], tempint)
-         output_ += sendCommands.send_commands(cmds=putcmd, script=True, control_hub=host, port=port)
-         output_ += sendCommands.send_commands(cmds=getcmd, script=True, control_hub=host, port=port)
-      checkOutput_rw(output_)
-      output += output_
+         cmds.append(putcmd)
+         cmds.append(getcmd)
+
+   output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+   checkOutput_rw(output)
 
    return output
 
@@ -119,18 +119,18 @@ def registerTest_rw_igloo(crate, rm, slot):
    ]
    #getRegisterSize(regs, crate, rm, slot, isBridge=False, isIgloo=True, isQIE=False)
 
-   output = []
-   for igloo in ["iTop", "iBot"]:
-      for reg in regs:
+   cmds =[]
+   for reg in regs:
+      for igloo in ["iTop", "iBot"]:
          getcmd = "get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, igloo, reg[0])
-         output_ = []
          for i in range(n):
             tempint = hex(randint(0, (2**reg[1])-1))
             putcmd = "put HB{0}-{1}-{2}-{3}_{4} {5}".format(crate, rm, slot, igloo, reg[0], tempint)
-            output_ += sendCommands.send_commands(cmds=putcmd, script=True, control_hub=host, port=port)
-            output_ += sendCommands.send_commands(cmds=getcmd, script=True, control_hub=host, port=port)
-         checkOutput_rw(output_)
-         output += output_
+            cmds.append(putcmd)
+            cmds.append(getcmd)
+
+   output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+   checkOutput_rw(output)
 
    return output
 
@@ -166,18 +166,17 @@ def registerTest_rw_qie(crate, rm, slot):
 
    QIEstart = 1 + (int(slot)-1)*16
    QIEend = QIEstart + 16-1
-   output = []
+   cmds = []
    for reg in regs:
       getcmd = "get HB{0}-{1}-QIE[{2}-{3}]_{4}".format(crate, rm, QIEstart, QIEend, reg[0])  
-      output_ = [] 
       for i in range(n):
          putcmd = "put HB{0}-{1}-QIE[{2}-{3}]_{4} ".format(crate, rm, QIEstart, QIEend, reg[0])
          for j in range(16):
             putcmd += "{0} ".format(hex(randint(0, (2**reg[1])-1)))
-         output_ += sendCommands.send_commands(cmds=putcmd, script=True, control_hub=host, port=port)
-         output_ += sendCommands.send_commands(cmds=getcmd, script=True, control_hub=host, port=port)
-      checkOutput_rw(output_)
-      output += output_
+         cmds.append(putcmd)
+         cmds.append(getcmd)      
+   output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+   checkOutput_rw(output)
 
    return output
 

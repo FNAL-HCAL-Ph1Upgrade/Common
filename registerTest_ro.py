@@ -18,7 +18,7 @@ def getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False):
             get = "get HB{0}-{1}-{2}-iTop_{3}".format(crate, rm, slot, reg[0])
          vals = []
          for i in range(32):
-            output = sendCommands.send_commands(cmds=get, script=True, control_hub=host, port=port)
+            output = sendCommands.send_commands(cmds=get, script=False, control_hub=host, port=port)
             result = output[0]['result'].replace('0x', '')
             result = int(result, 16)
             vals += [result]
@@ -30,31 +30,30 @@ def getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False):
                break
 
 
-def checkOutput_ro(output, min, max, checkStuck):
+def checkOutput_ro(output, regs):
 
-   vals = []
-   for entry in output:
-      result = entry['result']
-      if "ERROR" in result:
-         logger.error('trouble with get command: {0}'.format(entry))
-         vals += [result]
-      else :
-         result = entry['result'].replace('0x', '') 
-         result = int(result, 16)
-         vals += [result]
-         if (result < min or result > max):
-            logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(entry, min, max))
+   #vals = []
+   #for entry in output:
+   #   result = entry['result']
+   #   if "ERROR" in result:
+   #      logger.error('trouble with get command: {0}'.format(entry))
+   #      vals += [result]
+   #   else :
+   #      result = entry['result'].replace('0x', '') 
+   #      result = int(result, 16)
+   #      vals += [result]
+   #      if (result < min or result > max):
+   #         logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(entry, min, max))
 
-   if checkStuck:
-      isdup = False
-      unique = vals
-      for entry in vals:
-         count = unique.count(entry)
-         if count > 1:
-            isdup = True         
-      if isdup:
-         logger.error("counter may be stuck: {0}".format(output))
-
+   #if checkStuck:
+   #   isdup = False
+   #   unique = vals
+   #   for entry in vals:
+   #      count = unique.count(entry)
+   #      if count > 1:
+   #         isdup = True         
+   #   if isdup:
+   #      logger.error("counter may be stuck: {0}".format(output))
 
 
 def registerTest_ro_bridge(crate, rm, slot):
@@ -90,17 +89,15 @@ def registerTest_ro_bridge(crate, rm, slot):
       ["B_bc0_status_shift", 0, 0, False]
    ]
    #getCounterSize(regs, crate, rm, slot, isBridge=True, isIgloo=False)
-
-   output = []
+   
+   cmds = []
    for reg in regs:
-      getcmd = "get HB{0}-{1}-{2}-{3}".format(crate, rm, slot, reg[0])
-      output_ = []
       for i in range(0, n):
-         output_ += sendCommands.send_commands(cmds=getcmd, script=True, control_hub=host, port=port)
-      checkOutput_ro(output_, reg[1], reg[2], reg[3])
-      output += output_
+         cmds.append("get HB{0}-{1}-{2}-{3}".format(crate, rm, slot, reg[0])) 
 
-   #print output
+   output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+   checkOutput_ro(output, regs)
+
    return output
 
 
@@ -145,26 +142,15 @@ def registerTest_ro_igloo(crate, rm, slot):
    ]
    #getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=True)
    
-   output = []
+   cmds = []
    for reg in regs:
       for igloo in ["iTop", "iBot"]:
-         getcmd = "get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, igloo, reg[0])
-         output_ = []
          for i in range(0, n):
-            output_ += sendCommands.send_commands(cmds=getcmd, script=True, control_hub=host, port=port)
-         
-         if reg[0] == "FPGA_TopOrBottom":
-            if igloo == "iTop":
-              which = 1
-            if igloo == "iBot":
-               which = 0;
-            checkOutput_ro(output_, which, which, reg[3])
-         else :
-            checkOutput_ro(output_, reg[1], reg[2], reg[3])
-         
-         output += output_
+            cmds.append("get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, igloo, reg[0]))            
 
-   #print output
+   output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+   checkOutput_ro(output, regs)
+
    return output
 
 

@@ -9,12 +9,11 @@ host = 'localhost'
 
 def checkOutput_setDefaults(output):
    for entry in output:
-      if not entry['result']=="OK":
+      if not 'OK' in entry['result']:
          logger.warning('trouble with put command: {0}'.format(entry))
 
 
 def registerTest_setDefaults_bridge(crate, rm, slot):
-   
    logger.info('setting defaults for the bridge')
 
    # [register, default value]
@@ -29,22 +28,22 @@ def registerTest_setDefaults_bridge(crate, rm, slot):
       ["B_SCRATCH", 0],
       ["B_SHT_softreset", 0],
       ["B_SHT_user", 0],
-      ["B_Thermometer", 0],
+      #["B_Thermometer", 0],
       ["B_Top_RESET_N", 1],
       ["B_Top_TRST_N", 1]
    ]
 
-   output = []
+   cmds = []
    for reg in regs:
-      put = "put HB{0}-{1}-{2}-{3} {4}".format(crate, rm, slot, reg[0], reg[1])
-      output += sendCommands.send_commands(cmds=put, script=True, port=port, control_hub=host)
+      cmds.append("put HB{0}-{1}-{2}-{3} {4}".format(crate, rm, slot, reg[0], reg[1]))
 
+   output = sendCommands.send_commands(cmds=cmds, script=True, port=port, control_hub=host)
    checkOutput_setDefaults(output)
+   
    return output
 
 
 def registerTest_setDefaults_igloo(crate, rm, slot):
-   
    logger.info('setting defaults for the igloos')
   
    # [register, default value] 
@@ -71,13 +70,14 @@ def registerTest_setDefaults_igloo(crate, rm, slot):
       ["scratch", 0]
    ]
 
-   output = []
+   cmds = []
    for reg in regs:
       for igloo in ["iBot", "iTop"]:
-         put = "put HB{0}-{1}-{2}-{3}_{4} {5}".format(crate, rm, slot, igloo, reg[0], reg[1])  
-         output += sendCommands.send_commands(cmds=put, script=True, port=port, control_hub=host)
+         cmds.append("put HB{0}-{1}-{2}-{3}_{4} {5}".format(crate, rm, slot, igloo, reg[0], reg[1])  )
 
+   output = sendCommands.send_commands(cmds=cmds, script=True, port=port, control_hub=host)
    checkOutput_setDefaults(output)
+
    return output
 
 
@@ -109,12 +109,12 @@ def registerTest_setDefaults_qie(crate, rm, slot):
       ["Trim", 2]
    ]
 
-   output = []
    QIEstart = 1 + (int(slot)-1)*16
    QIEend = QIEstart + 16-1
+   cmds = []
    for reg in regs:
-      put = "put HB{0}-{1}-QIE[{2}-{3}]_{4} 16*{5}".format(crate, rm, QIEstart, QIEend, reg[0], reg[1])
-      output += sendCommands.send_commands(cmds=put, script=True, port=port, control_hub=host)
+      cmds.append("put HB{0}-{1}-QIE[{2}-{3}]_{4} 16*{5}".format(crate, rm, QIEstart, QIEend, reg[0], reg[1]))
+   output = sendCommands.send_commands(cmds=cmds, script=True, port=port, control_hub=host)
   
    checkOutput_setDefaults(output)
    return output
