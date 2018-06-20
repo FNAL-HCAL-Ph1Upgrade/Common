@@ -7,7 +7,7 @@ port = 64000
 host = 'localhost'
 n = 5
 
-
+#not the most efficient function...
 def getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False):
    for reg in regs:
       if reg[3] == True:
@@ -17,48 +17,57 @@ def getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False):
          if isIgloo:
             get = "get HB{0}-{1}-{2}-iTop_{3}".format(crate, rm, slot, reg[0])
          vals = []
-         for i in range(32):
-            output = sendCommands.send_commands(cmds=get, script=False, control_hub=host, port=port)
+         cmds = []
+         for i in range(1024):
+            cmds.append(get)
+         output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+         for entry in output:
             result = output[0]['result'].replace('0x', '')
             result = int(result, 16)
             vals += [result]
-         tempmax = max(vals)
-         for i in range(0, 10000000):
-            tempint = 2**i
-            if tempint > tempmax:
-               print "max return of register is: {0}; a size of {1}".format(tempmax, i)
+         for i in range(0, 99999999999999):
+            if 2**i > max(vals):
+               print "max return of register is: {0}; a size of {1}".format(max(vals), i)
                break
 
 
 def checkOutput_ro(output, regs):
 
-   # load up the numbers into an array
+   testpass = True
+   #load up the numbers into an array
    vals = []
    for entry in output:
       result = entry['result']
-   #   if "ERROR" in result:
-   #      logger.error('trouble with get command: {0}'.format(entry))
-   #   else :
-   #      #result = entry['result'].replace('0x', '') 
-   #      result = int(result, 16)
+      if "ERROR" in result:
+         logger.error('trouble with get command: {0}'.format(entry))
+         testpass = False
+         result = -1
+      else :
+         result = entry['result'].replace('0x', '')
+         result = int(result, 16)
       vals.append(result)
-   print vals
 
-   # now loop through registers
- #  for i, reg in regs:      
- #     nums = vals[5*i:5*i+4]
- #     for num in nums:
- #        if (num<reg[1]) or (num>reg[2]):
- #           logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(output[i], reg[1], reg[2]))
- #        if reg[3]:
- #           isdup = False
- #           unique = nums
- #           for entry in nums:
- #              count = unique.count(entry)
- #              if count > 1:
- #                 isdup = True
- #           if isdup:
- #              logger.error("counter may be stuck: {0}".format(output))
+   #check
+   for i in range(0, len(regs)) :
+      nums = vals[i:len(output):len(regs)]
+      for num in nums:
+         if ((num<regs[i][1]) or (num>regs[i][2])):
+            logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(output[i], regs[i][1], regs[i][2]))
+            testpass = False
+      if regs[i][3]:
+         isdup = False
+         unique = nums
+         for entry in nums:
+            count = unique.count(entry)
+            if count > 1:
+               isdup = True
+               break
+         if isdup:
+            thereturn = output[i:len(output):len(regs)]
+            logger.error("counter may be stuck: {0}".format(thereturn))
+            testpass = False
+
+   return testpass
 
 
 def registerTest_ro_bridge(crate, rm, slot):
@@ -69,29 +78,29 @@ def registerTest_ro_bridge(crate, rm, slot):
       ["B_AddrMatchCnt1", 0xadd0, 0xadd0, False],
       ["B_AddrMatchCnt2", 0xbad, 0xbad, False],      
       ["B_BkPln_GEO", int(slot), int(slot), False],
-      #["B_BkPln_RES_QIE", 0, 0, False],  
-      #["B_BkPln_Spare_1_Counter", 0xbadadd0, 0xbadadd0, False],
-      #["B_BkPln_Spare_2_Counter", 0xbadadd0, 0xbadadd0, False],
-      #["B_BkPln_Spare_3_Counter", 0xbadadd0, 0xbadadd0, False],
-      #["B_BkPln_WTE", 0, 0, False],
-      #["B_CLOCKCOUNTER", 0, (2**12)-1, True],
-      #["B_FIRMVERSION_MAJOR", 4, 4, False],
-      #["B_FIRMVERSION_MINOR", 2, 2, False],
-      #["B_ID1", 0x4842524d, 0x4842524d, False],
-      #["B_ID2", 0x42726467, 0x42726467, False],
-      #["B_ONES", 0xffffffff, 0xffffffff, False],
-      #["B_ONESZEROES", 0xaaaaaaaa, 0xaaaaaaaa, False],
-      #["B_RESQIECOUNTER", 0, (2**21)-1, True],
-      ##["B_SHT_ident", 0, -1], # returns two words
-      ##["B_SHT_rh_f", 0, -1], # returns decimal
-      ##["B_SHT_temp_f", 0. -1], # returns decimal
-      #["B_WTECOUNTER", 0, (2**21)-1, True],
-      #["B_ZEROES", 0, 0, False],
+      ["B_BkPln_RES_QIE", 0, 0, False],  
+      ["B_BkPln_Spare_1_Counter", 0xbadadd0, 0xbadadd0, False],
+      ["B_BkPln_Spare_2_Counter", 0xbadadd0, 0xbadadd0, False],
+      ["B_BkPln_Spare_3_Counter", 0xbadadd0, 0xbadadd0, False],
+      ["B_BkPln_WTE", 0, 0, False],
+      ["B_CLOCKCOUNTER", 0, (2**12)-1, True],
+      ["B_FIRMVERSION_MAJOR", 4, 4, False],
+      ["B_FIRMVERSION_MINOR", 2, 2, False],
+      ["B_ID1", 0x4842524d, 0x4842524d, False],
+      ["B_ID2", 0x42726467, 0x42726467, False],
+      ["B_ONES", 0xffffffff, 0xffffffff, False],
+      ["B_ONESZEROES", 0xaaaaaaaa, 0xaaaaaaaa, False],
+      ["B_RESQIECOUNTER", 0, (2**19)-1, True],
+      #["B_SHT_ident", 0, -1], # returns two words
+      #["B_SHT_rh_f", 0, -1], # returns decimal
+      #["B_SHT_temp_f", 0. -1], # returns decimal
+      ["B_WTECOUNTER", 0, 1, True],
+      ["B_ZEROES", 0, 0, False],
       ["B_bc0_status_count", 0, (2**21)-1, True],
-      #["B_bc0_status_max", 0xdec, 0xdec, False],
-      #["B_bc0_status_min", 0xdec, 0xdec, False],
-      #["B_bc0_status_missing", 0, 0, False],
-      #["B_bc0_status_shift", 0, 0, False]
+      ["B_bc0_status_max", 0xdec, 0xdec, False],
+      ["B_bc0_status_min", 0xdec, 0xdec, False],
+      ["B_bc0_status_missing", 0, 0, False],
+      ["B_bc0_status_shift", 0, 0, False]
    ]
    #getCounterSize(regs, crate, rm, slot, isBridge=True, isIgloo=False)
    
@@ -101,9 +110,8 @@ def registerTest_ro_bridge(crate, rm, slot):
          cmds.append("get HB{0}-{1}-{2}-{3}".format(crate, rm, slot, reg[0])) 
 
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   checkOutput_ro(output, regs)
-
-   return output
+   testpass = checkOutput_ro(output, regs)
+   return output, testpass
 
 
 def registerTest_ro_igloo(crate, rm, slot):
@@ -128,7 +136,7 @@ def registerTest_ro_igloo(crate, rm, slot):
       ["StatusReg_InputSpyWordNum", 0, 1, False],
       ["StatusReg_PLL320MHzLock", 1, 1, False],
       ["StatusReg_QieDLLNoLock", 0, 0, False],
-      ["WTE_count", 0, (2**22)-1, True],
+      ["WTE_count", 0, 1, True],
       ["ZerosRegister", 0, 0, False],
       ["bc0_gen_error", 0, 0, False],
       ["bc0_gen_locked", 0, 1, False],
@@ -147,22 +155,35 @@ def registerTest_ro_igloo(crate, rm, slot):
    ]
    #getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=True)
    
+   # do tests for top igloo
+   output_iTop = []
    cmds = []
    for i in range(0, n):
       for reg in regs:
-         for igloo in ["iTop", "iBot"]:
-            cmds.append("get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, igloo, reg[0]))
+         cmds.append("get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, "iTop", reg[0]))
+   output_iTop = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+   testpass_iTop = checkOutput_ro(output_iTop, regs)
 
-   output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   checkOutput_ro(output, regs)
-
-   return output
-
-
-def registerTest_ro_qie(crate, rm, slot):
-   logger.info('there are no read-only tests for the qies')
+   #do tests for bottom igloo
+   output_iBot = []
+   cmds = []
+   for i in range(0, n):
+      for reg in regs:
+         cmds.append("get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, "iBot", reg[0]))
+   output_iBot = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+   testpass_iBot = checkOutput_ro(output_iBot, regs) 
    
-   output = []
-   return output
+   #concatenate
+   output = output_iTop + output_iBot
+   testpass = testpass_iTop and testpass_iBot
+   return output, testpass
+
+
+#def registerTest_ro_qie(crate, rm, slot):
+#   logger.info('there are no read-only tests for the qies')
+   
+#   output = []
+#   testpass = true
+#   return output, testpass
 
 

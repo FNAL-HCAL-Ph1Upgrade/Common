@@ -15,7 +15,7 @@ from registerTest_setDefaults import registerTest_setDefaults_igloo
 from registerTest_setDefaults import registerTest_setDefaults_qie
 from registerTest_ro import registerTest_ro_bridge
 from registerTest_ro import registerTest_ro_igloo
-from registerTest_ro import registerTest_ro_qie
+#from registerTest_ro import registerTest_ro_qie
 from registerTest_rw import registerTest_rw_bridge
 from registerTest_rw import registerTest_rw_igloo
 from registerTest_rw import registerTest_rw_qie
@@ -39,7 +39,7 @@ def backplanereset(crate):
    cmds.append('put HB{0}-bkp_reset 0'.format(crate))
 
    output = sendCommands.send_commands(cmds=cmds, script=False, port=port, control_hub=host)   
-   
+
    for entry in output:
       result = entry['result']
       if not 'OK' in result:
@@ -134,7 +134,7 @@ if __name__ == "__main__":
       sys.exit()
 
    tempname = str(uuid.uuid4())
-   templogname = "{0}.log.tmp".format(tempname)
+   templogname = "{0}.runlog.tmp".format(tempname)
    logging.basicConfig(filename=templogname, level=logging.DEBUG)
    console = logging.StreamHandler()
    console.setLevel(logging.INFO)
@@ -142,7 +142,7 @@ if __name__ == "__main__":
    logger = logging.getLogger(__name__)
 
    logger.info("##########")
-   logger.info('your temporary test logfile: ./{0}'.format(templogname))
+   logger.info('your temporary run log: ./{0}'.format(templogname))
    logger.info(time.ctime(time.time()))
 
    logger.info('begin crate {0}, rm {1}, slot {2}'.format(crate, rm, slot))
@@ -150,7 +150,7 @@ if __name__ == "__main__":
    # log all commands
    tempcmdlogname = "{0}.cmdlog.tmp".format(tempname)
    cmdlogfile = open(tempcmdlogname, 'w+') 
-   logger.info('your temporary command logfile: ./{0}'.format(tempcmdlogname))
+   logger.info('your temporary command log: ./{0}'.format(tempcmdlogname))
 
    # reset the backplane
    #output = []
@@ -176,45 +176,59 @@ if __name__ == "__main__":
    # rename test log file to have uID in name
    runlog_fname = outputPath+"run.log"
    os.rename(templogname, runlog_fname)
-   logger.info('the temporary log file has been renamed: {0}'.format(runlog_fname))
+   logger.info('the run log file has been renamed: {0}'.format(runlog_fname))
    # rename command log file to have uID in name
-   runcmdlog_fname = outputPath+"cmds.log"
+   runcmdlog_fname = outputPath+"cmd.log"
    os.rename(tempcmdlogname, runcmdlog_fname)
-   logger.info('the temporary command log file has been renamed: {0}'.format(runcmdlog_fname))
+   logger.info('the command log file has been renamed: {0}'.format(runcmdlog_fname))
 
    # set defaults
-   output = registerTest_setDefaults_bridge(crate, rm, slot)
+   output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
-   output = registerTest_setDefaults_igloo(crate, rm, slot)
+   output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
-   output = registerTest_setDefaults_qie(crate, rm, slot)
+   output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
    
    # run bridge tests
-   output = registerTest_ro_bridge(crate, rm, slot)
+   output, pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
-   output = registerTest_rw_bridge(crate, rm, slot)
+   output, pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
-   output = registerTest_setDefaults_bridge(crate, rm, slot)
+   output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
    
    # run igloo tests
-   outlog = registerTest_ro_igloo(crate, rm, slot)
+   outlog, pass_ro_igloo = registerTest_ro_igloo(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
-   output = registerTest_rw_igloo(crate, rm, slot)
+   output, pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
-   output = registerTest_setDefaults_igloo(crate, rm, slot)
+   output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
 
    # run qie tests
-   output = registerTest_ro_qie(crate, rm, slot)
+   #output, pass_ro_qie = registerTest_ro_qie(crate, rm, slot)
+   #writeToCmdLog(output, cmdlogfile)
+   output, pass_rw_qie = registerTest_rw_qie(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
-   output = registerTest_rw_qie(crate, rm, slot)
+   output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
-   output = registerTest_setDefaults_qie(crate, rm, slot)
-   writeToCmdLog(output, cmdlogfile)
+
+   testresults = {
+      "uID" : uID,
+      "bridge_ro" : pass_ro_bridge,
+      "bridge_rw" : pass_rw_bridge,
+      "igloo_ro" : pass_ro_igloo,
+      "igloo_rw" : pass_rw_igloo,
+      "qie_rw" : pass_rw_qie
+   }
+
+   with open(outputPath+"results.log", 'w') as testresultsfile:
+      testresultsfile.write(str(testresults))
+   logger.info('the test results have been saved as {0}results.log'.format(outputPath))
 
    logger.info('finished crate {0}, rm {1}, slot {2}'.format(crate, rm, slot))
    logger.info(time.ctime(time.time()))
    logger.info("##########")
+
 
