@@ -8,9 +8,12 @@ host = 'localhost'
 
 
 def checkOutput_setDefaults(output):
+   testpass = True
    for entry in output:
       if not 'OK' in entry['result']:
          logger.warning('trouble with put command: {0}'.format(entry))
+         testpass = False
+   return testpass
 
 
 def registerTest_setDefaults_bridge(crate, rm, slot):
@@ -38,9 +41,8 @@ def registerTest_setDefaults_bridge(crate, rm, slot):
       cmds.append("put HB{0}-{1}-{2}-{3} {4}".format(crate, rm, slot, reg[0], reg[1]))
 
    output = sendCommands.send_commands(cmds=cmds, script=True, port=port, control_hub=host)
-   checkOutput_setDefaults(output)
-   
-   return output
+   testpass = checkOutput_setDefaults(output)
+   return output, testpass
 
 
 def registerTest_setDefaults_igloo(crate, rm, slot):
@@ -76,9 +78,8 @@ def registerTest_setDefaults_igloo(crate, rm, slot):
          cmds.append("put HB{0}-{1}-{2}-{3}_{4} {5}".format(crate, rm, slot, igloo, reg[0], reg[1])  )
 
    output = sendCommands.send_commands(cmds=cmds, script=True, port=port, control_hub=host)
-   checkOutput_setDefaults(output)
-
-   return output
+   testpass = checkOutput_setDefaults(output)
+   return output, testpass
 
 
 def registerTest_setDefaults_qie(crate, rm, slot):
@@ -114,9 +115,9 @@ def registerTest_setDefaults_qie(crate, rm, slot):
    cmds = []
    for reg in regs:
       cmds.append("put HB{0}-{1}-QIE[{2}-{3}]_{4} 16*{5}".format(crate, rm, QIEstart, QIEend, reg[0], reg[1]))
+
    output = sendCommands.send_commands(cmds=cmds, script=True, port=port, control_hub=host)
-  
-   checkOutput_setDefaults(output)
-   return output
+   testpass = checkOutput_setDefaults(output)
+   return output, testpass
 
 

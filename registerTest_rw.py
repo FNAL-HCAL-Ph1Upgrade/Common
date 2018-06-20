@@ -33,25 +33,29 @@ def getRegisterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False, isQIE=
          for (put, get) in zip(output[::2], output[1::2]):
             getvar = int(get['result'], 16)
             if not getvar == tempint:
-               tempstring = "register size is {0} bits. put {1}. get {2}".format(i, put, get)
-               print tempstring
+               print "register size is {0} bits. put {1}. get {2}".format(i, put, get)
                isgood = False
+               break
          if not isgood:
             break
 
 def checkOutput_rw(output):
-
+   testpass = True
    for i, (put, get) in enumerate(zip(output[::2], output[1::2])):
       if not 'OK' in put['result']:
          logger.error('trouble with put command: {0}'.format(put))
+         testpass = False
          continue
       if "ERROR" in get['result']:
          logger.error('trouble with get command: {0}'.format(get))
+         testpass = False
          continue
       putvar = ' '.join(put['cmd'].split()[2:]).replace('0x', '')
       getvar = get['result'].replace('0x', '')
       if not putvar==getvar:
          logger.error('put!=get: {0}, {1}'.format(put, get))
+         testpass = False
+   return testpass
 
 
 def registerTest_rw_bridge(crate, rm, slot):
@@ -85,9 +89,8 @@ def registerTest_rw_bridge(crate, rm, slot):
          cmds.append(getcmd)
 
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   checkOutput_rw(output)
-
-   return output
+   testpass = checkOutput_rw(output)
+   return output, testpass
 
 
 def registerTest_rw_igloo(crate, rm, slot):
@@ -130,9 +133,8 @@ def registerTest_rw_igloo(crate, rm, slot):
             cmds.append(getcmd)
 
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   checkOutput_rw(output)
-
-   return output
+   testpass = checkOutput_rw(output)
+   return output, testpass
 
 
 def registerTest_rw_qie(crate, rm, slot):
@@ -160,7 +162,7 @@ def registerTest_rw_qie(crate, rm, slot):
       ["TimingIref", 3],
       ["TimingThresholdDAC", 8],
       ["Trim", 2]
-      #["HB{0}-{1}-Qie[{2}-{3}]_ck_ph", -1]
+      #["HB{0}-{1}-Qie[{2}-{3}]_ck_ph", -1] QIE->Qie?
    ]
    #getRegisterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False, isQIE=True)
 
@@ -175,9 +177,9 @@ def registerTest_rw_qie(crate, rm, slot):
             putcmd += "{0} ".format(hex(randint(0, (2**reg[1])-1)))
          cmds.append(putcmd)
          cmds.append(getcmd)      
-   output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   checkOutput_rw(output)
 
-   return output
+   output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
+   testpass = checkOutput_rw(output)
+   return output, testpass
 
 
