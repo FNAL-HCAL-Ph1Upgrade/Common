@@ -139,9 +139,6 @@ if __name__ == "__main__":
       sys.exit()
 
    runNum = options.R
-   if not (runNum>-1):
-      logger.critical('no run number for this test!')
-
    tempname = str(uuid.uuid4())
    templogname = "{0}.runlog.tmp".format(tempname)
    logging.basicConfig(filename=templogname, level=logging.DEBUG)
@@ -181,9 +178,11 @@ if __name__ == "__main__":
    if (runNum==-1):
       outputPath = "./registerTestResults/{0}/".format(uID)
    else:
-      outputPath = "./registerTestResults/{0}/run{1}/".format(uID, runNum)
+      outputPath = "./registerTestResults/run{0}/{1}/".format(runNum, uID)
    if not os.path.exists(outputPath):
       os.makedirs(outputPath)
+
+   print outputPath
 
    # rename test log file to have uID in name
    runlog_fname = outputPath+"run.log"
