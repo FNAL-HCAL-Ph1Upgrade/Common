@@ -178,7 +178,7 @@ if __name__ == "__main__":
    if (runNum==-1):
       outputPath = "./registerTestResults/{0}/".format(uID)
    else:
-      outputPath = "./registerTestResults/run{0}/{1}/".format(runNum, uID)
+      outputPath = "./registerTestResults/Reg_run{0}/{1}/".format(runNum, uID)
    if not os.path.exists(outputPath):
       os.makedirs(outputPath)
 
