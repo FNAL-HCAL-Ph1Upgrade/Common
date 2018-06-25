@@ -24,6 +24,15 @@ def writeToCmdLog(output, cmdlogfile):
    for item in output:
       cmdlogfile.write("%s\n" % item)
 
+def makeOutputPath(uID):
+   path = "./registerTestResults/{0}/".format(uID)
+   if os.path.exists(path):
+      extension = 2
+      while os.path.exists( "./registerTestResults/{0}_v{1}/".format(uID, extension) ):
+         extension += 1
+      path = "./registerTestResults/{0}_v{1}/".format(uID, extension)
+   return path
+
 #def backplanereset(crate, half):
 def backplanereset(crate):
    logger = logging.getLogger(__name__)
@@ -113,11 +122,6 @@ if __name__ == "__main__":
       type = "int",
       help = "slot number within the readout module",
    )
-   parser.add_option("-R", "--runnumber", dest="R",
-      default = -1,
-      type = "int",
-      help = "run number associated with this test",
-   )
    (options, args) = parser.parse_args()
 
    crate = options.c
@@ -138,7 +142,6 @@ if __name__ == "__main__":
       logger.critical('required registerTest options: python registerTest.py --crate X --readoutmodule Y --slot Z')
       sys.exit()
 
-   runNum = options.R
    tempname = str(uuid.uuid4())
    templogname = "{0}.runlog.tmp".format(tempname)
    logging.basicConfig(filename=templogname, level=logging.DEBUG)
@@ -175,13 +178,8 @@ if __name__ == "__main__":
    output, uID = checkid(crate, rm, slot)
    writeToCmdLog(output, cmdlogfile)
  
-   if (runNum==-1):
-      outputPath = "./registerTestResults/{0}/".format(uID)
-   else:
-      outputPath = "./registerTestResults/Reg_run{0}/{1}/".format(runNum, uID)
-   if not os.path.exists(outputPath):
-      os.makedirs(outputPath)
-
+   outputPath = makeOutputPath(uID)
+   os.makedirs(outputPath)
    print outputPath
 
    # rename test log file to have uID in name
