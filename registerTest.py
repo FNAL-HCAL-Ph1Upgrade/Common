@@ -7,7 +7,6 @@ import uuid
 import ngFECSendCommand as sendCommands
 import logging
 
-port = 64100
 host = 'localhost'
 
 from registerTest_setDefaults import registerTest_setDefaults_bridge
@@ -33,16 +32,11 @@ def makeOutputPath(uID):
       path = "./registerTestResults/{0}_v{1}/".format(uID, extension)
    return path
 
-#def backplanereset(crate, half):
-def backplanereset(crate, halfback):
+def backplanereset(crate, halfback, port):
    logger = logging.getLogger(__name__)
-   #logger.info('resetting backplane {0}'.format(half))   
    logger.info('resetting backplane {0}{1}'.format(crate,halfback))   
 
    cmds = []
-   #cmds.append('put HB{0}{1}-bkp_pwr_enable 1'.format(crate, half))
-   #cmds.append('put HB{0}{1}-bkp_reset 1'.format(crate, half))
-   #cmds.append('put HB{0}{1}-bkp_reset 0'.format(crate, half)) 
    cmds.append('put HB{0}{1}-bkp_pwr_enable 1'.format(crate,halfback))
    cmds.append('put HB{0}{1}-bkp_reset 1'.format(crate,halfback))
    cmds.append('put HB{0}{1}-bkp_reset 0'.format(crate,halfback))
@@ -59,7 +53,7 @@ def backplanereset(crate, halfback):
    return output
 
 
-def checktemp(crate, rm, slot):
+def checktemp(crate, rm, slot, port):
    logger = logging.getLogger(__name__)
    logger.info('checking the bridge temperature')
    
@@ -81,7 +75,7 @@ def checktemp(crate, rm, slot):
    return output
 
 
-def checkid(crate, rm, slot):
+def checkid(crate, rm, slot, port):
    logger = logging.getLogger(__name__)
    logger.info('checking UniqueID')
 
@@ -105,35 +99,24 @@ def checkid(crate, rm, slot):
 
 
 if __name__ == "__main__":
-
    parser = OptionParser()
-   parser.add_option("-p","--port", dest="port", default = 64000, type = "int", help = "port needed for server")
-   parser.add_option("-c", "--crate", dest="c",
-      default = -1,
-      type = "int",
-      help = "crate number",
-   )
-   parser.add_option("-S","--side", dest="side", default = "", type = "str", help = "which half backplane")
-   parser.add_option("-r", "--readoutmodule", dest="r",
-      default = -1,
-      type = "int",
-      help = "readout module number",
-   )
-   parser.add_option("-s", "--slot", dest="s",
-      default = -1,
-      type = "int",
-      help = "slot number within the readout module",
-   )
+   parser.add_option("-p", "--port",  dest="port", default = 64000, type = "int", help = "port needed for server")
+   parser.add_option("-n", "--num",   dest="n",    default = 5,     type = "int", help = "number of interations")
+   parser.add_option("-S", "--side",  dest="side", default = "",    type = "str", help = "which half backplane")
+   parser.add_option("-c", "--crate", dest="c",    default = -1,    type = "int", help = "crate number")
+   parser.add_option("-r", "--rm",    dest="r",    default = -1,    type = "int", help = "readout module number")
+   parser.add_option("-s", "--slot",  dest="s",    default = -1,    type = "int", help = "slot number within the readout module")
    (options, args) = parser.parse_args()
 
+   port  = options.port
+   n = options.n
+   halfp = options.side
+   
    crate = options.c
    if not (crate>-1):
       logger.critical('specify a crate number!')
       logger.critical('required registerTest options: python registerTest.py --crate X --readoutmodule Y --slot Z')
       sys.exit()
-
-   halfp = options.side
-   port_try  = options.port
    
    rm = options.r
    if not (rm==1 or rm==2 or rm==3 or rm==4):
@@ -172,15 +155,15 @@ if __name__ == "__main__":
    #   output = backplanereset(crate, "")
    #elif (rm==3 or rm==4): 
    #   output = backplanereset(crate, "")
-   output = backplanereset(crate,halfp)
+   output = backplanereset(crate,halfp,port)
    writeToCmdLog(output, cmdlogfile)
 
    # check the temperature sensor
-   output = checktemp(crate, rm, slot)
+   output = checktemp(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
 
    # check for the unique id
-   output, uID = checkid(crate, rm, slot)
+   output, uID = checkid(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
  
    outputPath = makeOutputPath(uID)

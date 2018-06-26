@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 import ngFECSendCommand as sendCommands
 
-port = 64100
+port = 64000
 host = 'localhost'
 n = 5
 

@@ -4,14 +4,9 @@ import sys
 def runCard(switch, rbx, rm, slot):
     if int(switch):
         os.system('python registerTest.py -c {0} -r {1} -s {2}'.format(rbx, rm, slot))
-        #print 'python registerTest.py -c {0} -r {1} -s {2} -R {3}:    switch {4}'.format(rbx, rm, slot, runNum, switch)
 
 if __name__ == "__main__":
     rbx = 1
-
-    ##For testing
-    #for i in range(1,17):
-    #    print "RunNum {0} Card {1} Run: {2} ".format(runNum, i, sys.argv[i+1])
 
     #RM1
     runCard(sys.argv[1], rbx, 1, 1)
