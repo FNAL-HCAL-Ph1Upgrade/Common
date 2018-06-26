@@ -188,17 +188,17 @@ if __name__ == "__main__":
    writeToCmdLog(output, cmdlogfile)
    
    # run bridge tests
-   output, pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot, port)
+   output, pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot, port)
+   output, pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
    
    # run igloo tests
-   outlog, pass_ro_igloo = registerTest_ro_igloo(crate, rm, slot, port)
+   outlog, pass_ro_igloo = registerTest_ro_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port)
+   output, pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
@@ -206,7 +206,7 @@ if __name__ == "__main__":
    # run qie tests
    #output, pass_ro_qie = registerTest_ro_qie(crate, rm, slot)
    #writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_qie = registerTest_rw_qie(crate, rm, slot, port)
+   output, pass_rw_qie = registerTest_rw_qie(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)

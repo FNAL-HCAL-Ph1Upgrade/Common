@@ -4,7 +4,6 @@ logger = logging.getLogger(__name__)
 import ngFECSendCommand as sendCommands
 
 host = 'localhost'
-n = 1
 
 import random
 random.seed(1)
@@ -57,7 +56,7 @@ def checkOutput_rw(output):
    return testpass
 
 
-def registerTest_rw_bridge(crate, rm, slot, port):
+def registerTest_rw_bridge(crate, rm, slot, port, n):
    logger.info("beginning read-write tests for the bridge, will repeat operations {0} times.".format(n))
 
    # [name, size]
@@ -92,7 +91,7 @@ def registerTest_rw_bridge(crate, rm, slot, port):
    return output, testpass
 
 
-def registerTest_rw_igloo(crate, rm, slot, port):
+def registerTest_rw_igloo(crate, rm, slot, port, n):
    logger.info("beginning read-write tests for the igloos, will repeat operations {0} times.".format(n))
    
    # [name, size]
@@ -136,7 +135,7 @@ def registerTest_rw_igloo(crate, rm, slot, port):
    return output, testpass
 
 
-def registerTest_rw_qie(crate, rm, slot, port):
+def registerTest_rw_qie(crate, rm, slot, port, n):
    logger.info("beginning read-write tests for the qies, will repeat operations {0} times.".format(n))
 
    # [name, size]
