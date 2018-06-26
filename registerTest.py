@@ -155,7 +155,7 @@ if __name__ == "__main__":
    #   output = backplanereset(crate, "")
    #elif (rm==3 or rm==4): 
    #   output = backplanereset(crate, "")
-   output = backplanereset(crate,halfp,port)
+   output = backplanereset(crate, halfp, port)
    writeToCmdLog(output, cmdlogfile)
 
    # check the temperature sensor
@@ -180,35 +180,35 @@ if __name__ == "__main__":
    logger.info('the command log file has been renamed: {0}'.format(runcmdlog_fname))
 
    # set defaults
-   output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot)
+   output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot)
+   output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot)
+   output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
    
    # run bridge tests
-   output, pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot)
+   output, pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot)
+   output, pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot)
+   output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
    
    # run igloo tests
-   outlog, pass_ro_igloo = registerTest_ro_igloo(crate, rm, slot)
+   outlog, pass_ro_igloo = registerTest_ro_igloo(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot)
+   output, pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot)
+   output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
 
    # run qie tests
    #output, pass_ro_qie = registerTest_ro_qie(crate, rm, slot)
    #writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_qie = registerTest_rw_qie(crate, rm, slot)
+   output, pass_rw_qie = registerTest_rw_qie(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot)
+   output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
 
    testresults = {

@@ -3,9 +3,7 @@ logger = logging.getLogger(__name__)
 
 import ngFECSendCommand as sendCommands
 
-port = 64000
 host = 'localhost'
-
 
 def checkOutput_setDefaults(output):
    testpass = True
@@ -16,7 +14,7 @@ def checkOutput_setDefaults(output):
    return testpass
 
 
-def registerTest_setDefaults_bridge(crate, rm, slot):
+def registerTest_setDefaults_bridge(crate, rm, slot, port):
    logger.info('setting defaults for the bridge')
 
    # [register, default value]
@@ -45,7 +43,7 @@ def registerTest_setDefaults_bridge(crate, rm, slot):
    return output, testpass
 
 
-def registerTest_setDefaults_igloo(crate, rm, slot):
+def registerTest_setDefaults_igloo(crate, rm, slot, port):
    logger.info('setting defaults for the igloos')
   
    # [register, default value] 
@@ -82,7 +80,7 @@ def registerTest_setDefaults_igloo(crate, rm, slot):
    return output, testpass
 
 
-def registerTest_setDefaults_qie(crate, rm, slot):
+def registerTest_setDefaults_qie(crate, rm, slot, port):
 
    logger.info('setting defaults for the qies')
 

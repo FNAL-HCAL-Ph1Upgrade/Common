@@ -3,12 +3,11 @@ logger = logging.getLogger(__name__)
 
 import ngFECSendCommand as sendCommands
 
-port = 64000
 host = 'localhost'
-n = 5
+n = 1
 
 #not the most efficient function...
-def getCounterSize(regs, crate, rm, slot, isBridge=False, isIgloo=False):
+def getCounterSize(regs, crate, rm, slot, port, isBridge=False, isIgloo=False):
    for reg in regs:
       if reg[3] == True:
          print reg[0]
@@ -70,7 +69,7 @@ def checkOutput_ro(output, regs):
    return testpass
 
 
-def registerTest_ro_bridge(crate, rm, slot):
+def registerTest_ro_bridge(crate, rm, slot, port):
    logger.info('beginning read-only tests for the bridge, will repeat operations {0} times.'.format(n))
 
    # [name, min, max, iscounter?]
@@ -114,7 +113,7 @@ def registerTest_ro_bridge(crate, rm, slot):
    return output, testpass
 
 
-def registerTest_ro_igloo(crate, rm, slot):
+def registerTest_ro_igloo(crate, rm, slot, port):
    logger.info('beginning read-only tests for the igloos, will repeat operations {0} times.'.format(n))
 
    # [name, min, max, iscounter]
