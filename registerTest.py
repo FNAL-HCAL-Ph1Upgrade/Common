@@ -7,7 +7,7 @@ import uuid
 import ngFECSendCommand as sendCommands
 import logging
 
-port = 64000
+port = 64100
 host = 'localhost'
 
 from registerTest_setDefaults import registerTest_setDefaults_bridge
@@ -34,18 +34,18 @@ def makeOutputPath(uID):
    return path
 
 #def backplanereset(crate, half):
-def backplanereset(crate):
+def backplanereset(crate, halfback):
    logger = logging.getLogger(__name__)
    #logger.info('resetting backplane {0}'.format(half))   
-   logger.info('resetting backplane {0}'.format(crate))   
+   logger.info('resetting backplane {0}{1}'.format(crate,halfback))   
 
    cmds = []
    #cmds.append('put HB{0}{1}-bkp_pwr_enable 1'.format(crate, half))
    #cmds.append('put HB{0}{1}-bkp_reset 1'.format(crate, half))
    #cmds.append('put HB{0}{1}-bkp_reset 0'.format(crate, half)) 
-   cmds.append('put HB{0}-bkp_pwr_enable 1'.format(crate))
-   cmds.append('put HB{0}-bkp_reset 1'.format(crate))
-   cmds.append('put HB{0}-bkp_reset 0'.format(crate))
+   cmds.append('put HB{0}{1}-bkp_pwr_enable 1'.format(crate,halfback))
+   cmds.append('put HB{0}{1}-bkp_reset 1'.format(crate,halfback))
+   cmds.append('put HB{0}{1}-bkp_reset 0'.format(crate,halfback))
 
    output = sendCommands.send_commands(cmds=cmds, script=False, port=port, control_hub=host)   
 
@@ -107,11 +107,13 @@ def checkid(crate, rm, slot):
 if __name__ == "__main__":
 
    parser = OptionParser()
+   parser.add_option("-p","--port", dest="port", default = 64000, type = "int", help = "port needed for server")
    parser.add_option("-c", "--crate", dest="c",
       default = -1,
       type = "int",
       help = "crate number",
    )
+   parser.add_option("-S","--side", dest="side", default = "", type = "str", help = "which half backplane")
    parser.add_option("-r", "--readoutmodule", dest="r",
       default = -1,
       type = "int",
@@ -129,6 +131,9 @@ if __name__ == "__main__":
       logger.critical('specify a crate number!')
       logger.critical('required registerTest options: python registerTest.py --crate X --readoutmodule Y --slot Z')
       sys.exit()
+
+   halfp = options.side
+   port_try  = options.port
    
    rm = options.r
    if not (rm==1 or rm==2 or rm==3 or rm==4):
@@ -167,7 +172,7 @@ if __name__ == "__main__":
    #   output = backplanereset(crate, "")
    #elif (rm==3 or rm==4): 
    #   output = backplanereset(crate, "")
-   output = backplanereset(crate)
+   output = backplanereset(crate,halfp)
    writeToCmdLog(output, cmdlogfile)
 
    # check the temperature sensor

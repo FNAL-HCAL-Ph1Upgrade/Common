@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 import ngFECSendCommand as sendCommands
 
-port = 64000
+port = 64100
 host = 'localhost'
 n = 5
 
@@ -50,9 +50,9 @@ def checkOutput_ro(output, regs):
    #check
    for i in range(0, len(regs)) :
       nums = vals[i:len(output):len(regs)]
-      for num in nums:
+      for j,num in enumerate(nums):
          if ((num<regs[i][1]) or (num>regs[i][2])):
-            logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(output[i], regs[i][1], regs[i][2]))
+            logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(output[i+j*len(regs)], regs[i][1], regs[i][2]))
             testpass = False
       if regs[i][3]:
          isdup = False
@@ -90,11 +90,11 @@ def registerTest_ro_bridge(crate, rm, slot):
       ["B_ID2", 0x42726467, 0x42726467, False],
       ["B_ONES", 0xffffffff, 0xffffffff, False],
       ["B_ONESZEROES", 0xaaaaaaaa, 0xaaaaaaaa, False],
-      ["B_RESQIECOUNTER", 0, (2**19)-1, True],
+      ["B_RESQIECOUNTER", 0, (2**24)-1, True],
       #["B_SHT_ident", 0, -1], # returns two words
       #["B_SHT_rh_f", 0, -1], # returns decimal
       #["B_SHT_temp_f", 0. -1], # returns decimal
-      ["B_WTECOUNTER", 0, 1, True],
+      ["B_WTECOUNTER", 0, (2**24)-1, True],
       ["B_ZEROES", 0, 0, False],
       ["B_bc0_status_count", 0, (2**21)-1, True],
       ["B_bc0_status_max", 0xdec, 0xdec, False],
@@ -136,7 +136,7 @@ def registerTest_ro_igloo(crate, rm, slot):
       ["StatusReg_InputSpyWordNum", 0, 1, False],
       ["StatusReg_PLL320MHzLock", 1, 1, False],
       ["StatusReg_QieDLLNoLock", 0, 0, False],
-      ["WTE_count", 0, 1, True],
+      ["WTE_count", 0, (2**32)-1, True],
       ["ZerosRegister", 0, 0, False],
       ["bc0_gen_error", 0, 0, False],
       ["bc0_gen_locked", 0, 1, False],
