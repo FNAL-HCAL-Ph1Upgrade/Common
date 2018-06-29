@@ -116,6 +116,9 @@ if __name__ == "__main__":
 
    tester_name   = options.t
    test_comments = options.C
+
+   print tester_name
+   print test_comments
    
    crate = options.c
    if not (crate>-1):
