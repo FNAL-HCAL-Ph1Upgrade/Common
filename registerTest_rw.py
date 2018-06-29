@@ -137,7 +137,7 @@ def registerTest_rw_igloo(crate, rm, slot, port, n):
             putcmd = "put HB{0}-{1}-{2}-{3}_{4} {5}".format(crate, rm, slot, igloo, reg[0], tempint)
             cmds.append(putcmd)
             cmds.append(getcmd)
-            reg_list.append(igloo+reg[0])
+            reg_list.append(igloo+"_"+reg[0])
             
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
    testpass, reg_dict_status = checkOutput_rw(output,reg_list)
@@ -176,17 +176,19 @@ def registerTest_rw_qie(crate, rm, slot, port, n):
    QIEstart = 1 + (int(slot)-1)*16
    QIEend = QIEstart + 16-1
    cmds = []
+   reg_list = []
    for reg in regs:
       getcmd = "get HB{0}-{1}-QIE[{2}-{3}]_{4}".format(crate, rm, QIEstart, QIEend, reg[0])  
       for i in range(n):
          putcmd = "put HB{0}-{1}-QIE[{2}-{3}]_{4} ".format(crate, rm, QIEstart, QIEend, reg[0])
          for j in range(16):
-            putcmd += "{0} ".format(hex(randint(0, (2**reg[1])-1)))
+            putcmd += "{0} ".format(hex(randint(0, (2**reg[1])-1)))#adding random number to put command
          cmds.append(putcmd)
-         cmds.append(getcmd)      
+         cmds.append(getcmd)
+         reg_list.append(reg[0])
 
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   testpass = checkOutput_rw(output)
-   return output, testpass
+   testpass, reg_status_list = checkOutput_rw(output,reg_list)
+   return output, testpass, reg_status_list
 
 

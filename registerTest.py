@@ -214,7 +214,7 @@ if __name__ == "__main__":
    # run qie tests
    #output, pass_ro_qie = registerTest_ro_qie(crate, rm, slot)
    #writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_qie = registerTest_rw_qie(crate, rm, slot, port, n)
+   output, pass_rw_qie, per_reg_pass_rw_qie = registerTest_rw_qie(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
@@ -235,6 +235,8 @@ if __name__ == "__main__":
    testresults.update(per_reg_pass_ro_iTop)
    testresults.update(per_reg_pass_ro_iBot)
    testresults.update(per_reg_pass_rw_igloo)
+   testresults.update(per_reg_pass_rw_qie)
+   
    with open(outputPath+"results.json", 'w') as testresultsfile:
       json.dump(testresults, testresultsfile)
       #testresultsfile.write(str(testresults))
