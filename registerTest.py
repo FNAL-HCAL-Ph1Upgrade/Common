@@ -218,13 +218,13 @@ if __name__ == "__main__":
 
    testresults = {
       "uID" : uID,
-      "bridge_ro" : int(pass_ro_bridge),
-      "bridge_rw" : int(pass_rw_bridge),
-      "igloo_ro" : int(pass_ro_igloo),
-      "igloo_rw" : int(pass_rw_igloo),
-      "qie_rw" : int(pass_rw_qie),
-      "Comments" : "Adding a comment to the register test",
-      "Tester_Name" : "Chris Madrid"
+      #"bridge_ro" : int(pass_ro_bridge),
+      #"bridge_rw" : int(pass_rw_bridge),
+      #"igloo_ro" : int(pass_ro_igloo),
+      #"igloo_rw" : int(pass_rw_igloo),
+      #"#qie_rw" : int(pass_rw_qie),
+      "Comments" : test_comments,
+      "Tester_Name" : tester_name
    }
 
    testresults.update(per_reg_pass_ro_bridge)

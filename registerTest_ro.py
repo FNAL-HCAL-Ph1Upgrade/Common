@@ -90,8 +90,16 @@ def checkOutput_ro(output, regs, n):
                testpass = False
                pass_count -= 1
       
-      pass_status = "passed {0} out of {1} trials".format(str(pass_count),str(n))
-      list_status.append(pass_status)
+      #pass_status = "passed {0} out of {1} trials".format(str(pass_count),str(n))
+      if pass_count == n:
+         pass_res = 1
+      else:
+         pass_res = 0
+
+      pass_res_list = [pass_res, pass_count, n-pass_count]#Did register pass, how many passed, how many failed   
+         
+      list_status.append(pass_res)
+      #list_status.append(pass_res_list)#Can be used once we know it can be parsed
    
    reg_status = dict(zip(list_regs, list_status))#dictionary with register as key, pass_status string as value
 
