@@ -106,11 +106,16 @@ if __name__ == "__main__":
    parser.add_option("-c", "--crate", dest="c",    default = -1,    type = "int", help = "crate number")
    parser.add_option("-r", "--rm",    dest="r",    default = -1,    type = "int", help = "readout module number")
    parser.add_option("-s", "--slot",  dest="s",    default = -1,    type = "int", help = "slot number within the readout module")
+   parser.add_option("-t", "--tester",dest="t",    default = "ninja",type= "str", help = "name of person running tests")
+   parser.add_option("-C", "--comments",dest="C",  default = "n/a", type = "str", help = "comments provided by tester")
    (options, args) = parser.parse_args()
 
    port  = options.port
    n = options.n
    halfp = options.side
+
+   tester_name   = options.t
+   test_comments = options.C
    
    crate = options.c
    if not (crate>-1):
@@ -196,7 +201,7 @@ if __name__ == "__main__":
    writeToCmdLog(output, cmdlogfile)
    
    # run igloo tests
-   outlog, pass_ro_igloo, per_reg_pass_ro_ig_iTop, per_reg_pass_ro_ig_iBot = registerTest_ro_igloo(crate, rm, slot, port, n)
+   outlog, pass_ro_igloo, per_reg_pass_ro_iTop, per_reg_pass_ro_iBot = registerTest_ro_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
@@ -218,9 +223,13 @@ if __name__ == "__main__":
       "igloo_ro" : pass_ro_igloo,
       "igloo_rw" : pass_rw_igloo,
       "qie_rw" : pass_rw_qie,
-      "Comments" : "Adding a comment to the register test",
-      "Tester_Name" : "Chris Madrid"
+      "Comments" : test_comments,
+      "Tester_Name" : tester_name
    }
+
+   testresults.update(per_reg_pass_ro_bridge)
+   testresults.update(per_reg_pass_ro_iTop)
+   testresults.update(per_reg_pass_ro_iBot)
 
    with open(outputPath+"results.json", 'w') as testresultsfile:
       json.dump(testresults, testresultsfile)

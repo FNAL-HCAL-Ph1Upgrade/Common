@@ -32,21 +32,21 @@ def getCounterSize(regs, crate, rm, slot, port, isBridge=False, isIgloo=False):
 def checkOutput_ro(output, regs, n):
 
    testpass = True
-   #load up the numbers into an array
+   #load up the numbers into a list
    vals = []
    #build lists to make by register dictionary
    list_regs   = []
    list_status = []
-   
-   #is igloo?
-   #if "iTop" in output[0][0]:
-   #   ig_type = "iTop"
-   #elif "iBot" in output[0][0]:
-   #   ig_type = "iBot"
-   #else:
-   #   ig_type = ""
 
-   for entry in output:#goes through each passed command and builds list of numbers representing outputs
+   #is igloo?
+   is_iTop = False
+   is_iBot = False
+   if "iTop" in output[0]["cmd"]:
+      is_iTop = True
+   if "iBot" in output[0]["cmd"]:
+      is_iBot = True
+
+    for entry in output:#goes through each passed command and builds list of numbers representing outputs
       result = entry['result']
       if "ERROR" in result:
          logger.error('trouble with get command: {0}'.format(entry))
@@ -59,9 +59,17 @@ def checkOutput_ro(output, regs, n):
 
    #check for failure in other ways and tracks per register pass/fail
    for i in range(0, len(regs)) :
+      #makes list of just register names
+      if is_iTop:
+         list_regs.append("iTop_"+regs[i][0])
+      if is_iBot:
+         list_regs.append("iBot_"+regs[i][0])
+      else:
+         list_regs.append(regs[i][0])
+
       nums = vals[i:len(output):len(regs)]#returns values corresponding to the ith register
-      list_regs.append(regs[i][0])#makes list of just registers, no other info
       pass_count = n
+      
       for j,num in enumerate(nums):
          if num == -1:
             pass_count -= 1#tracks which register failed from first for loop
@@ -69,6 +77,7 @@ def checkOutput_ro(output, regs, n):
             logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(output[i+j*len(regs)], regs[i][1], regs[i][2]))
             testpass = False
             pass_count -= 1#tracks failures from unexpected values
+
       if regs[i][3]:#if register is a counter
          isdup = False
          unique = nums
