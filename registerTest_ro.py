@@ -46,7 +46,7 @@ def checkOutput_ro(output, regs, n):
    if "iBot" in output[0]["cmd"]:
       is_iBot = True
 
-    for entry in output:#goes through each passed command and builds list of numbers representing outputs
+   for entry in output:#goes through each passed command and builds list of numbers representing outputs
       result = entry['result']
       if "ERROR" in result:
          logger.error('trouble with get command: {0}'.format(entry))

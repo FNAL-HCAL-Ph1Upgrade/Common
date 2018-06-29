@@ -193,7 +193,7 @@ if __name__ == "__main__":
    writeToCmdLog(output, cmdlogfile)
    
    # run bridge tests
-   output, pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot, port, n)
+   output, pass_ro_bridge, per_reg_pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
