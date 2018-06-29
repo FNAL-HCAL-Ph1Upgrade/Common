@@ -203,7 +203,7 @@ if __name__ == "__main__":
    # run igloo tests
    outlog, pass_ro_igloo, per_reg_pass_ro_iTop, per_reg_pass_ro_iBot = registerTest_ro_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port, n)
+   output, pass_rw_igloo, per_reg_pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
@@ -231,7 +231,7 @@ if __name__ == "__main__":
    testresults.update(per_reg_pass_rw_bridge)
    testresults.update(per_reg_pass_ro_iTop)
    testresults.update(per_reg_pass_ro_iBot)
-
+   testresults.update(per_reg_pass_rw_igloo)
    with open(outputPath+"results.json", 'w') as testresultsfile:
       json.dump(testresults, testresultsfile)
       #testresultsfile.write(str(testresults))

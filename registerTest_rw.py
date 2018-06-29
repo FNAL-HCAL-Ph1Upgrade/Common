@@ -127,6 +127,7 @@ def registerTest_rw_igloo(crate, rm, slot, port, n):
    ]
    #getRegisterSize(regs, crate, rm, slot, isBridge=False, isIgloo=True, isQIE=False)
 
+   reg_list = []
    cmds =[]
    for reg in regs:
       for igloo in ["iTop", "iBot"]:
@@ -136,10 +137,11 @@ def registerTest_rw_igloo(crate, rm, slot, port, n):
             putcmd = "put HB{0}-{1}-{2}-{3}_{4} {5}".format(crate, rm, slot, igloo, reg[0], tempint)
             cmds.append(putcmd)
             cmds.append(getcmd)
-
+            reg_list.append(igloo+reg[0])
+            
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   testpass = checkOutput_rw(output)
-   return output, testpass
+   testpass, reg_dict_status = checkOutput_rw(output,reg_list)
+   return output, testpass, reg_dict_status
 
 
 def registerTest_rw_qie(crate, rm, slot, port, n):
