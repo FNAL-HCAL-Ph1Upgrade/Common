@@ -195,7 +195,7 @@ if __name__ == "__main__":
    # run bridge tests
    output, pass_ro_bridge, per_reg_pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot, port, n)
+   output, pass_rw_bridge, per_reg_pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
@@ -228,6 +228,7 @@ if __name__ == "__main__":
    }
 
    testresults.update(per_reg_pass_ro_bridge)
+   testresults.update(per_reg_pass_rw_bridge)
    testresults.update(per_reg_pass_ro_iTop)
    testresults.update(per_reg_pass_ro_iBot)
 

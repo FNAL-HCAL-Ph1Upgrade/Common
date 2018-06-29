@@ -37,9 +37,11 @@ def getRegisterSize(regs, crate, rm, slot, port, isBridge=False, isIgloo=False, 
          if not isgood:
             break
 
-def checkOutput_rw(output):
+def checkOutput_rw(output,list_regs):
    testpass = True
+   result_dict = {}
    for i, (put, get) in enumerate(zip(output[::2], output[1::2])):
+      result_dict[list_regs[i]] = 1#default is passing
       if not 'OK' in put['result']:
          logger.error('trouble with put command: {0}'.format(put))
          testpass = False
@@ -53,7 +55,10 @@ def checkOutput_rw(output):
       if not putvar==getvar:
          logger.error('put!=get: {0}, {1}'.format(put, get))
          testpass = False
-   return testpass
+      if not testpass:
+         result_dict[list_regs[i]] = 0
+         
+   return testpass, result_dict
 
 
 def registerTest_rw_bridge(crate, rm, slot, port, n):
@@ -78,6 +83,7 @@ def registerTest_rw_bridge(crate, rm, slot, port, n):
    #getRegisterSize(regs, crate, rm, slot, isBridge=True, isIgloo=False, isQIE=False)
 
    cmds = []
+   regs_list = []
    for reg in regs:
       getcmd = "get HB{0}-{1}-{2}-{3}".format(crate, rm, slot, reg[0])
       for i in range(n):
@@ -85,10 +91,11 @@ def registerTest_rw_bridge(crate, rm, slot, port, n):
          putcmd = "put HB{0}-{1}-{2}-{3} {4}".format(crate, rm, slot, reg[0], tempint)
          cmds.append(putcmd)
          cmds.append(getcmd)
-
+         regs_list.append(reg[0])
+         
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   testpass = checkOutput_rw(output)
-   return output, testpass
+   testpass, regs_status_dict  = checkOutput_rw(output,regs_list)
+   return output, testpass, regs_status_dict
 
 
 def registerTest_rw_igloo(crate, rm, slot, port, n):
