@@ -106,11 +106,19 @@ if __name__ == "__main__":
    parser.add_option("-c", "--crate", dest="c",    default = -1,    type = "int", help = "crate number")
    parser.add_option("-r", "--rm",    dest="r",    default = -1,    type = "int", help = "readout module number")
    parser.add_option("-s", "--slot",  dest="s",    default = -1,    type = "int", help = "slot number within the readout module")
+   parser.add_option("-t", "--tester",dest="t",    default = "ninja",type= "str", help = "name of person running tests")
+   parser.add_option("-C", "--comments",dest="C",  default = "n/a", type = "str", help = "comments provided by tester")
    (options, args) = parser.parse_args()
 
    port  = options.port
    n = options.n
    halfp = options.side
+
+   tester_name   = options.t
+   test_comments = options.C
+
+   print tester_name
+   print test_comments
    
    crate = options.c
    if not (crate>-1):
@@ -188,17 +196,17 @@ if __name__ == "__main__":
    writeToCmdLog(output, cmdlogfile)
    
    # run bridge tests
-   output, pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot, port, n)
+   output, pass_ro_bridge, per_reg_pass_ro_bridge = registerTest_ro_bridge(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot, port, n)
+   output, pass_rw_bridge, per_reg_pass_rw_bridge = registerTest_rw_bridge(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_bridge = registerTest_setDefaults_bridge(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
    
    # run igloo tests
-   outlog, pass_ro_igloo = registerTest_ro_igloo(crate, rm, slot, port, n)
+   outlog, pass_ro_igloo, per_reg_pass_ro_iTop, per_reg_pass_ro_iBot = registerTest_ro_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port, n)
+   output, pass_rw_igloo, per_reg_pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_igloo = registerTest_setDefaults_igloo(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
@@ -206,22 +214,29 @@ if __name__ == "__main__":
    # run qie tests
    #output, pass_ro_qie = registerTest_ro_qie(crate, rm, slot)
    #writeToCmdLog(output, cmdlogfile)
-   output, pass_rw_qie = registerTest_rw_qie(crate, rm, slot, port, n)
+   output, pass_rw_qie, per_reg_pass_rw_qie = registerTest_rw_qie(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_setDefaults_qie = registerTest_setDefaults_qie(crate, rm, slot, port)
    writeToCmdLog(output, cmdlogfile)
 
    testresults = {
       "uID" : uID,
-      "bridge_ro" : int(pass_ro_bridge),
-      "bridge_rw" : int(pass_rw_bridge),
-      "igloo_ro" : int(pass_ro_igloo),
-      "igloo_rw" : int(pass_rw_igloo),
-      "qie_rw" : int(pass_rw_qie),
-      "Comments" : "Adding a comment to the register test",
-      "Tester_Name" : "Chris Madrid"
+      #"bridge_ro" : int(pass_ro_bridge),
+      #"bridge_rw" : int(pass_rw_bridge),
+      #"igloo_ro" : int(pass_ro_igloo),
+      #"igloo_rw" : int(pass_rw_igloo),
+      #"#qie_rw" : int(pass_rw_qie),
+      "Comments" : test_comments,
+      "Tester_Name" : tester_name
    }
 
+   testresults.update(per_reg_pass_ro_bridge)
+   testresults.update(per_reg_pass_rw_bridge)
+   testresults.update(per_reg_pass_ro_iTop)
+   testresults.update(per_reg_pass_ro_iBot)
+   testresults.update(per_reg_pass_rw_igloo)
+   testresults.update(per_reg_pass_rw_qie)
+   
    with open(outputPath+"results.json", 'w') as testresultsfile:
       json.dump(testresults, testresultsfile)
       #testresultsfile.write(str(testresults))

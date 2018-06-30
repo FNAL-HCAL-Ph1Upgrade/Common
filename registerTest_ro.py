@@ -29,12 +29,24 @@ def getCounterSize(regs, crate, rm, slot, port, isBridge=False, isIgloo=False):
                break
 
 
-def checkOutput_ro(output, regs):
+def checkOutput_ro(output, regs, n):
 
    testpass = True
-   #load up the numbers into an array
+   #load up the numbers into a list
    vals = []
-   for entry in output:
+   #build lists to make by register dictionary
+   list_regs   = []
+   list_status = []
+
+   #is igloo?
+   is_iTop = False
+   is_iBot = False
+   if "iTop" in output[0]["cmd"]:
+      is_iTop = True
+   if "iBot" in output[0]["cmd"]:
+      is_iBot = True
+
+   for entry in output:#goes through each passed command and builds list of numbers representing outputs
       result = entry['result']
       if "ERROR" in result:
          logger.error('trouble with get command: {0}'.format(entry))
@@ -45,27 +57,53 @@ def checkOutput_ro(output, regs):
          result = int(result, 16)
       vals.append(result)
 
-   #check
+   #check for failure in other ways and tracks per register pass/fail
    for i in range(0, len(regs)) :
-      nums = vals[i:len(output):len(regs)]
+      #makes list of just register names
+      if is_iTop:
+         list_regs.append("iTop_"+regs[i][0])
+      if is_iBot:
+         list_regs.append("iBot_"+regs[i][0])
+      else:
+         list_regs.append(regs[i][0])
+
+      nums = vals[i:len(output):len(regs)]#returns values corresponding to the ith register
+      pass_count = n
+      
       for j,num in enumerate(nums):
+         if num == -1:
+            pass_count -= 1#tracks which register failed from first for loop
          if ((num<regs[i][1]) or (num>regs[i][2])):
             logger.error('unexpected return from get command: {0}; expected range [{1}, {2}]'.format(output[i+j*len(regs)], regs[i][1], regs[i][2]))
             testpass = False
-      if regs[i][3]:
+            pass_count -= 1#tracks failures from unexpected values
+
+      if regs[i][3]:#if register is a counter
          isdup = False
          unique = nums
          for entry in nums:
             count = unique.count(entry)
             if count > 1:
                isdup = True
-               break
-         if isdup:
-            thereturn = output[i:len(output):len(regs)]
-            logger.error("counter may be stuck: {0}".format(thereturn))
-            testpass = False
+               thereturn = output[i:len(output):len(regs)]
+               logger.error("counter may be stuck: {0}".format(thereturn))
+               testpass = False
+               pass_count -= 1
+      
+      #pass_status = "passed {0} out of {1} trials".format(str(pass_count),str(n))
+      if pass_count == n:
+         pass_res = 1
+      else:
+         pass_res = 0
 
-   return testpass
+      pass_res_list = [pass_res, pass_count, n-pass_count]#Did register pass, how many passed, how many failed   
+         
+      list_status.append(pass_res)
+      #list_status.append(pass_res_list)#Can be used once we know it can be parsed
+   
+   reg_status = dict(zip(list_regs, list_status))#dictionary with register as key, pass_status string as value
+
+   return testpass, reg_status
 
 
 def registerTest_ro_bridge(crate, rm, slot, port, n):
@@ -108,8 +146,8 @@ def registerTest_ro_bridge(crate, rm, slot, port, n):
          cmds.append("get HB{0}-{1}-{2}-{3}".format(crate, rm, slot, reg[0])) 
 
    output = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   testpass = checkOutput_ro(output, regs)
-   return output, testpass
+   testpass, reg_status = checkOutput_ro(output, regs, n)
+   return output, testpass, reg_status
 
 
 def registerTest_ro_igloo(crate, rm, slot, port, n):
@@ -160,7 +198,7 @@ def registerTest_ro_igloo(crate, rm, slot, port, n):
       for reg in regs:
          cmds.append("get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, "iTop", reg[0]))
    output_iTop = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   testpass_iTop = checkOutput_ro(output_iTop, regs)
+   testpass_iTop, reg_status_iTop = checkOutput_ro(output_iTop, regs, n)
 
    #do tests for bottom igloo
    output_iBot = []
@@ -169,12 +207,12 @@ def registerTest_ro_igloo(crate, rm, slot, port, n):
       for reg in regs:
          cmds.append("get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, "iBot", reg[0]))
    output_iBot = sendCommands.send_commands(cmds=cmds, script=False, control_hub=host, port=port)
-   testpass_iBot = checkOutput_ro(output_iBot, regs) 
+   testpass_iBot, reg_status_iBot = checkOutput_ro(output_iBot, regs, n) 
    
    #concatenate
    output = output_iTop + output_iBot
    testpass = testpass_iTop and testpass_iBot
-   return output, testpass
+   return output, testpass, reg_status_iTop, reg_status_iBot
 
 
 #def registerTest_ro_qie(crate, rm, slot):
