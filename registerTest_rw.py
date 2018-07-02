@@ -75,8 +75,8 @@ def checkOutput_rw(output,list_regs,n):
       if pass_count !== n:
          reg_truth = 0
 
-      result_dict[list_regs[i]] = reg_truth#does this on per register basis, no counting per iteration
-      #result_dict[list_regs[i]] = [reg_truth,pass_count,n-pass_count]#this has the number info
+      #result_dict[list_regs[i]] = reg_truth#does this on per register basis, no counting per iteration
+      result_dict[list_regs[i]] = [reg_truth,pass_count,n-pass_count]#this has the number info
       
    return testpass, result_dict
 
@@ -105,7 +105,7 @@ def registerTest_rw_bridge(crate, rm, slot, port, n):
    cmds = []
    regs_list = []
    for reg in regs:
-      regs_list.append(reg[0])
+      regs_list.append("reg_"+reg[0])
       getcmd = "get HB{0}-{1}-{2}-{3}".format(crate, rm, slot, reg[0])
       for i in range(n):
          tempint = hex(randint(0, (2**reg[1])-1))
@@ -151,7 +151,7 @@ def registerTest_rw_igloo(crate, rm, slot, port, n):
    cmds =[]
    for reg in regs:
       for igloo in ["iTop", "iBot"]:
-         reg_list.append(igloo+"_"+reg[0])
+         reg_list.append("reg_"+igloo+"_"+reg[0])
          getcmd = "get HB{0}-{1}-{2}-{3}_{4}".format(crate, rm, slot, igloo, reg[0])
          for i in range(n):
             tempint = hex(randint(0, (2**reg[1])-1))
@@ -198,7 +198,7 @@ def registerTest_rw_qie(crate, rm, slot, port, n):
    cmds = []
    reg_list = []
    for reg in regs:
-      reg_list.append(reg[0])
+      reg_list.append("reg_"+reg[0])
       getcmd = "get HB{0}-{1}-QIE[{2}-{3}]_{4}".format(crate, rm, QIEstart, QIEend, reg[0])  
       for i in range(n):
          putcmd = "put HB{0}-{1}-QIE[{2}-{3}]_{4} ".format(crate, rm, QIEstart, QIEend, reg[0])

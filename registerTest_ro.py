@@ -61,11 +61,11 @@ def checkOutput_ro(output, regs, n):
    for i in range(0, len(regs)) :
       #makes list of just register names
       if is_iTop:
-         list_regs.append("iTop_"+regs[i][0])
+         list_regs.append("reg_iTop_"+regs[i][0])
       if is_iBot:
-         list_regs.append("iBot_"+regs[i][0])
+         list_regs.append("reg_iBot_"+regs[i][0])
       else:
-         list_regs.append(regs[i][0])
+         list_regs.append("reg_"+regs[i][0])
 
       nums = vals[i:len(output):len(regs)]#returns values corresponding to the ith register
       pass_count = n
@@ -98,8 +98,8 @@ def checkOutput_ro(output, regs, n):
 
       pass_res_list = [pass_res, pass_count, n-pass_count]#Did register pass, how many passed, how many failed   
          
-      list_status.append(pass_res)
-      #list_status.append(pass_res_list)#Can be used once we know it can be parsed
+      #list_status.append(pass_res)
+      list_status.append(pass_res_list)#Can be used once we know it can be parsed
    
    reg_status = dict(zip(list_regs, list_status))#dictionary with register as key, pass_status string as value
 
