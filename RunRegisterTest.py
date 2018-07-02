@@ -3,7 +3,7 @@ import sys
 
 def runCard(switch, rbx, rm, slot, n, tName, comments):
     if int(switch):
-        os.system('python registerTest.py -c {0} -r {1} -s {2} -n {3} -t {4} -C {5}'.format(rbx, rm, slot, n, tName, comments))
+        os.system('python registerTest.py -c {0} -r {1} -s {2} -n {3} -t "{4}" -C "{5}"'.format(rbx, rm, slot, n, tName, comments))
 
 if __name__ == "__main__":
     rbx = 1
