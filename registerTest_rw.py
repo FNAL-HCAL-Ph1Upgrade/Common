@@ -72,7 +72,7 @@ def checkOutput_rw(output,list_regs,n):
    for i in range(len(list_regs)):
       l_per_reg  = stat_val[i+i*(n-1):n+i*n]#finds the values that correspond to each register
       pass_count = sum(l_per_reg)
-      if pass_count !== n:
+      if pass_count != n:
          reg_truth = 0
 
       #result_dict[list_regs[i]] = reg_truth#does this on per register basis, no counting per iteration
