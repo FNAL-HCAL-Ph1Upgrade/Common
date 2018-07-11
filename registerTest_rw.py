@@ -39,7 +39,7 @@ def getRegisterSize(regs, crate, rm, slot, port, isBridge=False, isIgloo=False, 
 
 def checkOutput_rw(output,list_regs,n):
    testpass = True#truth value for all rw tests
-   reg_pass = 1   #pass status per register, initialized to passing
+   reg_truth = 1   #pass status per register, initialized to passing
    stat_val = []  #list of pass/fail values per register
    
    result_dict = {}#dictionary where per register test info will be stored
