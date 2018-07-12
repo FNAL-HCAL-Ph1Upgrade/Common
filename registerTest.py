@@ -204,7 +204,7 @@ if __name__ == "__main__":
    writeToCmdLog(output, cmdlogfile)
    
    # run igloo tests
-   outlog, pass_ro_igloo, per_reg_pass_ro_iTop, per_reg_pass_ro_iBot = registerTest_ro_igloo(crate, rm, slot, port, n)
+   output, pass_ro_igloo, per_reg_pass_ro_iTop, per_reg_pass_ro_iBot = registerTest_ro_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
    output, pass_rw_igloo, per_reg_pass_rw_igloo = registerTest_rw_igloo(crate, rm, slot, port, n)
    writeToCmdLog(output, cmdlogfile)
