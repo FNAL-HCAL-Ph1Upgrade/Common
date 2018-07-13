@@ -62,12 +62,13 @@ def checkOutput_ro(output, regs, n):
       #makes list of just register names
       if is_iTop:
          list_regs.append("reg_iTop_"+regs[i][0])
-      if is_iBot:
+      elif is_iBot:
          list_regs.append("reg_iBot_"+regs[i][0])
       else:
          list_regs.append("reg_"+regs[i][0])
 
       nums = vals[i:len(output):len(regs)]#returns values corresponding to the ith register
+      
       pass_count = n
       
       for j,num in enumerate(nums):
@@ -83,12 +84,13 @@ def checkOutput_ro(output, regs, n):
          unique = nums
          for entry in nums:
             count = unique.count(entry)
-            if count > 1:
+            if count > 3:
                isdup = True
                thereturn = output[i:len(output):len(regs)]
                logger.error("counter may be stuck: {0}".format(thereturn))
                testpass = False
                pass_count -= 1
+            #logger.error("reg status: {0} {1}".format(reg[0], pass_count))
       
       #pass_status = "passed {0} out of {1} trials".format(str(pass_count),str(n))
       if pass_count == n:
@@ -96,6 +98,7 @@ def checkOutput_ro(output, regs, n):
       else:
          pass_res = 0
 
+      logger.error("reg status: {0} {1} {2} {3}".format(regs[i][0], list_regs[i],pass_count, pass_res))
       pass_res_list = [pass_res, pass_count, n-pass_count]#Did register pass, how many passed, how many failed   
          
       #list_status.append(pass_res)
