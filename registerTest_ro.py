@@ -98,7 +98,7 @@ def checkOutput_ro(output, regs, n):
       else:
          pass_res = 0
 
-      logger.error("reg status: {0} {1} {2} {3}".format(regs[i][0], list_regs[i],pass_count, pass_res))
+      #logger.error("reg status: {0} {1} {2} {3}".format(regs[i][0], list_regs[i],pass_count, pass_res))
       pass_res_list = [pass_res, pass_count, n-pass_count]#Did register pass, how many passed, how many failed   
          
       #list_status.append(pass_res)
