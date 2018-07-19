@@ -1,12 +1,13 @@
 import os
 import sys
+import ngFECSendCommand as sendCmds
 
 def runCard(switch, rbx, rm, slot, n, tName, comments):
     if int(switch):
         op = os.system('python registerTest.py -c {0} -r {1} -s {2} -n {3} -t "{4}" -C "{5}"'.format(rbx, rm, slot, n, tName, comments))
         if op != 0:
-            print "problem with rm {0}, slot {1}, seems to have aborted".format(rm,slot)
-        outdict  = ["sysres":op,"rm":rm,"slot":slot]
+            print '\x1b[91mREG TEST STOPPED for rm {0}, slot {1}, run it again ninja\x1b[0m'.format(rm,slot)#weird characters make it red
+        outdict  = {"sysres":op,"rm":rm,"slot":slot}
         return outdict
         
 
@@ -38,8 +39,20 @@ if __name__ == "__main__":
     runout.append(runCard(sys.argv[16], rbx, 4, 3, n, tName, comments)) 
     runout.append(runCard(sys.argv[17], rbx, 4, 4, n, tName, comments)) 
 
+    servcmds = []
+    badpos   = []
     for d in runout:
-        if d["sysres"] != 0:
-            print "There was a problem running reg test on RM {0}, slot{1}".format(d["rm"],d["slot"])
+        if d is not None and d["sysres"] != 0:
+            servcmds.append('get HB{0}-{1}-{2}-UniqueID'.format(rbx,d["rm"],d["slot"]))
+            badpos.append(d)
 
+    output = sendCmds.send_commands(cmds=servcmds,script = False, port = 64000,control_hub = 'localhost')#Hack for port and host!!!!! 
+        
+    for i,entry in enumerate(output):
+        uid = entry['result']
+        uid = uid.split(" ")
+        uid = uid[1]+"_"+uid[2]
+        print '\x1b[91mFAILED RUNNING REG TEST on RM {0}, slot {1}, UniqueID {2} sys error {3}, RUN AGAIN\x1b[0m'.format(badpos[i]["rm"],badpos[i]["slot"],uid,badpos[i]["sysres"])
+    
+            
 
