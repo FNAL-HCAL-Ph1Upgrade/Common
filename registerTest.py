@@ -24,12 +24,12 @@ def writeToCmdLog(output, cmdlogfile):
       cmdlogfile.write("%s\n" % item)
 
 def makeOutputPath(uID):
-   path = "./registerTestResults/{0}/".format(uID)
-   if os.path.exists(path):
-      extension = 2
-      while os.path.exists( "./registerTestResults/{0}_v{1}/".format(uID, extension) ):
-         extension += 1
-      path = "./registerTestResults/{0}_v{1}/".format(uID, extension)
+   extension = 1
+   while os.path.exists( "/home/hcalpro/DATA/RegTestResults/{0}_v{1}/".format(uID, extension) ):
+      extension += 1
+   while os.path.exists( "./registerTestResults/{0}_v{1}/".format(uID, extension) ):
+      extension += 1
+   path = "./registerTestResults/{0}_v{1}/".format(uID, extension)
    return path
 
 def backplanereset(crate, halfback, port):
@@ -106,7 +106,7 @@ if __name__ == "__main__":
    parser.add_option("-c", "--crate", dest="c",    default = -1,    type = "int", help = "crate number")
    parser.add_option("-r", "--rm",    dest="r",    default = -1,    type = "int", help = "readout module number")
    parser.add_option("-s", "--slot",  dest="s",    default = -1,    type = "int", help = "slot number within the readout module")
-   parser.add_option("-t", "--tester",dest="t",    default = "ninja",type= "str", help = "name of person running tests")
+   parser.add_option("-t", "--tester",dest="t",    default = "hcaldaq",type= "str", help = "name of person running tests")
    parser.add_option("-C", "--comments",dest="C",  default = "n/a", type = "str", help = "comments provided by tester")
    (options, args) = parser.parse_args()
 
@@ -176,7 +176,6 @@ if __name__ == "__main__":
  
    outputPath = makeOutputPath(uID)
    os.makedirs(outputPath)
-   print outputPath
 
    # rename test log file to have uID in name
    runlog_fname = outputPath+"run.log"

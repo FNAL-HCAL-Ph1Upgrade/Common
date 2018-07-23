@@ -48,11 +48,40 @@ if __name__ == "__main__":
 
     output = sendCmds.send_commands(cmds=servcmds,script = False, port = 64000,control_hub = 'localhost')#Hack for port and host!!!!! 
         
+    if output != []:
+        os.system("spd-say -t male1 'Register test crashed for a card'")
+
     for i,entry in enumerate(output):
         uid = entry['result']
         uid = uid.split(" ")
         uid = uid[1]+"_"+uid[2]
-        print '\x1b[91mFAILED RUNNING REG TEST on RM {0}, slot {1}, UniqueID {2} sys error {3}, RUN AGAIN\x1b[0m'.format(badpos[i]["rm"],badpos[i]["slot"],uid,badpos[i]["sysres"])
-    
-            
+        outline = 'FAILED RUNNING REG TEST on RM {0}, slot {1}, UniqueID {2} sys error {3}'.format(badpos[i]["rm"],badpos[i]["slot"],uid,badpos[i]["sysres"])
+        print '\x1b[91m'+outline+', RUN AGAIN\x1b[0m'
 
+        #Get directory of crashed run 
+        extension = 1
+        #dirpath = "BAD DIRECTORY"
+        while os.path.exists( "/home/hcalpro/DATA/RegTestResults/{0}_v{1}/".format(uid, extension) ):
+            extension += 1
+        #dirpath = "./registerTestResults/{0}_v{1}/".format(uid, extension)
+        while os.path.exists( "./registerTestResults/{0}_v{1}/".format(uid, extension) ):
+            extension += 1
+        if extension == 1:
+            continue
+        else:
+            extension -= 1
+        dirpath = "./registerTestResults/{0}_v{1}/".format(uid, extension)
+
+        print dirpath
+
+        #Appending what happened to log
+        fname = open(dirpath+"run.log","a")
+        fname.write('\n'+outline)
+        
+        mvline = 'mv {0} ~/DATA/RegTestResults/'.format(dirpath)
+        print mvline
+        #Moving the directory lacking json
+        moveit = os.system(mvline)
+        if moveit == 0:
+            print "moved bad directory to ~/DATA/RegTestResults/"
+    
