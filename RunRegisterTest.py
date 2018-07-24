@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     output = sendCmds.send_commands(cmds=servcmds,script = False, port = 64000,control_hub = 'localhost')#Hack for port and host!!!!! 
         
-    message = "play -q ~/Downloads/Help_-The_Beatles.mp3 trim 0:00 0:03.4; sleep 0.5; python3 -m google_speech -v warning 'Re do register test for a card' -e vol 2.0 &> /dev/null"
+    message = "play -q ~/Downloads/Help_-The_Beatles.mp3 trim 0:00 0:03.4; sleep 0.5; python3 -m google_speech -l en -v warning 'NIINNJJAA!, Re do register test for a card' -e vol 4.0 &> /dev/null"
     if output != []:
         os.system(message)
 
